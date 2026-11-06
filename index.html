@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.4">
+<meta name="version" content="1.5">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -211,8 +211,6 @@ header .wrap{position:relative}
 /* ---------- W słupku ---------- */
 :root{--p0:rgba(217,70,59,.10);--p1:rgba(30,138,76,.10);--p2:rgba(31,58,147,.10);--p3:rgba(255,159,67,.16);--p4:rgba(150,80,200,.12);--cw:54px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--p0:rgba(255,127,116,.14);--p1:rgba(110,230,154,.12);--p2:rgba(150,180,255,.14);--p3:rgba(255,180,90,.14);--p4:rgba(200,150,255,.14)}}
-.sl-top{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
-.sl-top .seg button{font-size:1.3rem}
 .stats.three{grid-template-columns:repeat(3,1fr)}
 .sl-play{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:32px;align-items:start;padding-top:6px}
 @media (max-width:1100px){.sl-play{grid-template-columns:1fr}}
@@ -257,8 +255,6 @@ header .wrap{position:relative}
   header .wrap{flex-wrap:nowrap}
   .menu-btn{font-size:1.05rem;padding:5px 10px;gap:10px}
   .menu{right:12px}
-  .sl-top .seg{flex-wrap:nowrap;width:100%;justify-content:space-between;gap:2px}
-  .sl-top .seg button{font-size:clamp(.9rem,4.3vw,1.1rem);padding:1px 2px;white-space:nowrap}
   .sl-play{gap:12px}
   .sl-work{gap:10px}
   :root{--cw:44px}
@@ -296,7 +292,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.4">1.4</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.5">1.5</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -317,6 +313,15 @@ header .wrap{position:relative}
       <aside class="panel settings" aria-label="Ustawienia słupków">
         <h2>Ustawienia</h2>
         <div class="field">
+          <span class="label">Działanie</span>
+          <div class="seg" id="sl-op">
+            <button data-op="add">Dodawanie</button>
+            <button data-op="sub">Odejmowanie</button>
+            <button data-op="mul">Mnożenie</button>
+            <button data-op="div">Dzielenie</button>
+          </div>
+        </div>
+        <div class="field">
           <span class="label" id="sl-digits-label">Ile cyfr?</span>
           <div class="seg" id="sl-digits">
             <button data-d="2">2 cyfry</button>
@@ -330,14 +335,6 @@ header .wrap{position:relative}
         <p class="hint">Kolory kolumn: J – jedności, D – dziesiątki, S – setki, T – tysiące.</p>
       </aside>
       <div class="stage">
-        <div class="sl-top">
-          <div class="seg" id="sl-op">
-            <button data-op="add">Dodawanie</button>
-            <button data-op="sub">Odejmowanie</button>
-            <button data-op="mul">Mnożenie</button>
-            <button data-op="div">Dzielenie</button>
-          </div>
-        </div>
         <div class="stats three">
           <div class="stat ok"><b id="sl-solved">0</b><span>Rozwiązane</span></div>
           <div class="stat"><b id="sl-clean">0</b><span>Bez błędu</span></div>
@@ -355,7 +352,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.4 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.5 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
