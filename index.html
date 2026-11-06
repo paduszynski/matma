@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.3">
-<meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci. Fiszki z mnożenia i dzielenia w zakresie 100.">
+<meta name="version" content="1.4">
+<meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -186,6 +186,28 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 
+
+/* ---------- menu ---------- */
+header .wrap{position:relative}
+.menu-btn{margin-left:auto;display:flex;align-items:center;gap:12px;border:2px solid var(--ink);background:var(--sheet);border-radius:12px 16px 10px 14px;padding:6px 12px;font-size:1.25rem;min-width:0}
+.menu-title{background:linear-gradient(transparent 50%,var(--hl) 50%);color:var(--hl-ink);padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.burger{display:flex;flex-direction:column;gap:5px;width:24px;flex:none}
+.burger i{display:block;height:3px;border-radius:3px;background:var(--ink)}
+.burger i:nth-child(1){transform:rotate(-2deg)} .burger i:nth-child(3){transform:rotate(2deg);width:85%}
+.menu-btn[aria-expanded="true"] .burger i:nth-child(1){transform:translateY(8px) rotate(45deg)}
+.menu-btn[aria-expanded="true"] .burger i:nth-child(2){opacity:0}
+.menu-btn[aria-expanded="true"] .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg);width:100%}
+.menu{position:absolute;right:16px;top:100%;margin-top:8px;z-index:30;background:var(--sheet);box-shadow:var(--shadow);border:2px solid var(--ink);
+  border-radius:6px 10px 8px 12px;padding:8px;display:flex;flex-direction:column;gap:4px;width:min(380px,calc(100vw - 32px))}
+.menu[hidden]{display:none}
+.menu-item{text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:10px 13px 9px 12px;display:flex;flex-direction:column;gap:2px}
+.menu-item b{font-weight:400;font-size:1.4rem;line-height:1.1;width:fit-content;padding:0 3px}
+.menu-item span{color:var(--ink-soft);font-size:1rem}
+.menu-item:hover{background:var(--paper)}
+.menu-item[aria-current="true"] b{background:linear-gradient(transparent 50%,var(--hl) 50%);color:var(--hl-ink)}
+.grid.wide td{font-size:.95rem;padding:4px 0}
+.grid.wide th{font-size:1.05rem;padding:2px}
+
 /* ---------- W słupku ---------- */
 :root{--p0:rgba(217,70,59,.10);--p1:rgba(30,138,76,.10);--p2:rgba(31,58,147,.10);--p3:rgba(255,159,67,.16);--p4:rgba(150,80,200,.12);--cw:54px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--p0:rgba(255,127,116,.14);--p1:rgba(110,230,154,.12);--p2:rgba(150,180,255,.14);--p3:rgba(255,180,90,.14);--p4:rgba(200,150,255,.14)}}
@@ -231,6 +253,10 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   .logo{width:32px;height:32px;font-size:1.3rem;border-width:2px}
   .ver{font-size:.75rem;padding:0 5px}
   .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0;width:100%;gap:12px}
+
+  header .wrap{flex-wrap:nowrap}
+  .menu-btn{font-size:1.05rem;padding:5px 10px;gap:10px}
+  .menu{right:12px}
   .sl-top .seg{flex-wrap:nowrap;width:100%;justify-content:space-between;gap:2px}
   .sl-top .seg button{font-size:clamp(.9rem,4.3vw,1.1rem);padding:1px 2px;white-space:nowrap}
   .sl-play{gap:12px}
@@ -263,124 +289,30 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   .actions:empty{display:none}
 }
 @media (hover:none){.kbd-hint{display:none}}
+@media (max-width:359px){.menu-title{display:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.3">1.3</span></div>
-    <nav class="tabs" role="tablist" aria-label="Moduły">
-      <button class="tab" role="tab" id="tab-btn-fiszki" aria-controls="tab-fiszki" aria-selected="true" data-tab="fiszki">Fiszki mnożenie i dzielenie</button>
-      <button class="tab" role="tab" id="tab-btn-slupek" aria-controls="tab-slupek" aria-selected="false" data-tab="slupek">W słupku</button>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.4">1.4</span></div>
+    <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
+      <span class="menu-title" id="menu-title"></span>
+      <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <nav class="menu" id="menu" hidden aria-label="Moduły">
+      <button class="menu-item" type="button" data-tab="do20"><b>Liczę do 20</b><span>Dodawanie, odejmowanie i mnożenie z wynikiem do 20</span></button>
+      <button class="menu-item" type="button" data-tab="fiszki"><b>Mnożenie i dzielenie</b><span>Fiszki z tabliczki mnożenia, wyniki do 100</span></button>
+      <button class="menu-item" type="button" data-tab="slupek"><b>W słupku</b><span>Dodawanie, odejmowanie, mnożenie i dzielenie pisemne</span></button>
     </nav>
   </div>
 </header>
 
 <main class="wrap">
-  <section id="tab-fiszki" class="tabpanel" role="tabpanel" aria-labelledby="tab-btn-fiszki">
-    <div class="layout">
-      <aside class="panel settings" aria-label="Ustawienia">
-        <h2>Ustawienia</h2>
-        <div class="field">
-          <span class="label">Działanie</span>
-          <div class="seg" id="op-seg">
-            <button data-op="mul">Mnożenie</button>
-            <button data-op="div">Dzielenie</button>
-            <button data-op="mix">Wszystko</button>
-          </div>
-        </div>
-        <div class="field">
-          <span class="label" id="nums-label">Które liczby?</span>
-          <div class="chips" id="chips"></div>
-          <div class="chip-actions">
-            <button class="link" id="all-nums">Zaznacz wszystkie</button>
-            <button class="link" id="no-nums">Wyczyść</button>
-          </div>
-          <p class="hint" id="nums-hint"></p>
-        </div>
-        <div class="field">
-          <span class="label">Jak odpowiadam?</span>
-          <div class="seg" id="mode-seg">
-            <button data-mode="type">Wpisuję wynik</button>
-            <button data-mode="flip">Odwracam kartę</button>
-          </div>
-        </div>
-        <div class="field">
-          <span class="label">Ile fiszek w rundzie?</span>
-          <div class="seg" id="size-seg">
-            <button data-size="10">10</button>
-            <button data-size="20">20</button>
-            <button data-size="30">30</button>
-            <button data-size="all">Wszystkie</button>
-          </div>
-        </div>
-        <div class="field">
-          <button class="btn primary small" id="new-round">Nowa runda ↻</button>
-        </div>
-      </aside>
-
-      <div class="stage">
-        <div class="stats">
-          <div class="stat ok"><b id="s-ok">0</b><span>Dobrze</span></div>
-          <div class="stat bad"><b id="s-bad">0</b><span>Do poprawy</span></div>
-          <div class="stat streak"><b id="s-streak">0</b><span>Seria</span></div>
-          <div class="stat"><b id="s-left">0</b><span>Zostało</span></div>
-        </div>
-        <div class="progress-bar" aria-hidden="true"><i id="bar"></i></div>
-
-        <div id="play" class="play">
-          <div style="display:flex;flex-direction:column;gap:16px">
-            <div class="card" id="card" aria-live="polite">
-              <div class="card-inner">
-                <div class="face front">
-                  <span class="badge" id="badge-front">Mnożenie</span>
-                  <span class="badge retry hidden" id="retry-front">Jeszcze raz</span>
-                  <div class="expr" id="front-expr"></div>
-                  <div class="sub" id="front-sub"></div>
-                </div>
-                <div class="face back">
-                  <span class="badge" id="badge-back">Mnożenie</span>
-                  <div class="expr" id="back-expr"></div>
-                  <div class="feedback" id="feedback"></div>
-                </div>
-              </div>
-            </div>
-            <div class="actions" id="actions"></div>
-            <p class="kbd-hint" id="kbd-hint"></p>
-          </div>
-          <div class="numpad" id="numpad" aria-label="Klawiatura liczbowa"></div>
-        </div>
-
-        <div id="summary" class="panel summary hidden"></div>
-      </div>
-    </div>
-
-    <section class="panel mastery" aria-label="Postęp">
-      <div class="mastery-head">
-        <h2>Mój postęp – tabliczka</h2>
-        <div class="seg" id="grid-seg">
-          <button data-grid="mul">Mnożenie</button>
-          <button data-grid="div">Dzielenie</button>
-        </div>
-      </div>
-      <div class="grid-scroll"><table class="grid" id="grid"></table></div>
-      <div class="mastery-foot">
-        <div class="legend">
-          <span><i></i>Jeszcze nie ćwiczone</span>
-          <span><i style="background:var(--m1)"></i>Do poprawy</span>
-          <span><i style="background:var(--m2)"></i>Uczę się</span>
-          <span><i style="background:var(--m3)"></i>Prawie umiem</span>
-          <span><i style="background:var(--m4)"></i>Umiem!</span>
-        </div>
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-          <span class="overall" id="overall"></span>
-          <button class="link" id="reset">Wyzeruj postęp</button>
-        </div>
-      </div>
-    </section>
-  </section>
-  <section id="tab-slupek" class="tabpanel" role="tabpanel" aria-labelledby="tab-btn-slupek" hidden>
+  <section id="tab-do20" class="tabpanel" aria-label="Liczę do 20" hidden></section>
+  <section id="tab-fiszki" class="tabpanel" aria-label="Mnożenie i dzielenie" hidden></section>
+  <section id="tab-slupek" class="tabpanel" aria-label="W słupku" hidden>
     <div class="layout">
       <aside class="panel settings" aria-label="Ustawienia słupków">
         <h2>Ustawienia</h2>
@@ -423,49 +355,158 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   </section>
 </main>
 
-<footer>Matma 1.3 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.4 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
+// ---------- shared: confetti, menu, PWA ----------
 (() => {
-  const LS = 'matma.fiszki.v1';
-  const NUMS = [0,1,2,3,4,5,6,7,8,9,10];
-  const DEFAULTS = { op: 'mix', nums: [1,2,3,4,5,6,7,8,9,10], mode: 'type', size: '20', grid: 'mul' };
+  const cv = document.getElementById('confetti'), cx = cv.getContext('2d');
+  let parts = [], raf = 0;
+  function confetti(n) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
+    const colors = ['#1f3a93', '#d9463b', '#fff176', '#1e8a4c', '#ffb74d', '#4fc3f7'];
+    for (let i = 0; i < n; i++) parts.push({
+      x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35,
+      vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4,
+      s: 6 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+      c: colors[i % colors.length], life: 0,
+    });
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    const d = devicePixelRatio;
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts = parts.filter(p => p.y < innerHeight + 40 && p.life < 300);
+    for (const p of parts) {
+      p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life++;
+      cx.save(); cx.translate(p.x * d, p.y * d); cx.rotate(p.r);
+      cx.fillStyle = p.c; cx.fillRect(-p.s * d / 2, -p.s * d / 4, p.s * d, p.s * d / 2);
+      cx.restore();
+    }
+    raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0, 0, cv.width, cv.height), 0);
+  }
+  window.matmaConfetti = confetti;
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+})();
+
+// ---------- flashcards module, used by "Liczę do 20" and "Mnożenie i dzielenie" ----------
+function Flashcards(cfg) {
+  const root = document.getElementById('tab-' + cfg.id);
   const PRAISE = ['Brawo!', 'Super!', 'Świetnie!', 'Tak jest!', 'Doskonale!', 'Ekstra!', 'Mistrzowsko!', 'Dobrze!'];
-  const $ = id => document.getElementById(id);
+  const segHtml = (id, attr, items) => `<div class="seg" data-id="${id}">${items.map(([v, l]) => `<button type="button" data-${attr}="${v}">${l}</button>`).join('')}</div>`;
+
+  root.innerHTML = `
+    <div class="layout">
+      <aside class="panel settings" aria-label="Ustawienia">
+        <h2>Ustawienia</h2>
+        <div class="field">
+          <span class="label">Działanie</span>
+          ${segHtml('op-seg', 'op', cfg.ops)}
+        </div>
+        <div class="field">
+          <span class="label" data-id="nums-label"></span>
+          ${cfg.filter === 'chips' ? `
+            <div class="chips" data-id="chips"></div>
+            <div class="chip-actions">
+              <button class="link" type="button" data-id="all-nums">Zaznacz wszystkie</button>
+              <button class="link" type="button" data-id="no-nums">Wyczyść</button>
+            </div>` : segHtml('range-seg', 'max', cfg.ranges)}
+          <p class="hint" data-id="nums-hint"></p>
+        </div>
+        <div class="field">
+          <span class="label">Jak odpowiadam?</span>
+          ${segHtml('mode-seg', 'mode', [['type', 'Wpisuję wynik'], ['flip', 'Odwracam kartę']])}
+        </div>
+        <div class="field">
+          <span class="label">Ile fiszek w rundzie?</span>
+          ${segHtml('size-seg', 'size', [['10', '10'], ['20', '20'], ['30', '30'], ['all', 'Wszystkie']])}
+        </div>
+        <div class="field">
+          <button class="btn primary small" type="button" data-id="new-round">Nowa runda ↻</button>
+        </div>
+      </aside>
+
+      <div class="stage">
+        <div class="stats">
+          <div class="stat ok"><b data-id="s-ok">0</b><span>Dobrze</span></div>
+          <div class="stat bad"><b data-id="s-bad">0</b><span>Do poprawy</span></div>
+          <div class="stat streak"><b data-id="s-streak">0</b><span>Seria</span></div>
+          <div class="stat"><b data-id="s-left">0</b><span>Zostało</span></div>
+        </div>
+        <div class="progress-bar" aria-hidden="true"><i data-id="bar"></i></div>
+
+        <div data-id="play" class="play">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="card" data-id="card" aria-live="polite">
+              <div class="card-inner">
+                <div class="face front">
+                  <span class="badge" data-id="badge-front"></span>
+                  <span class="badge retry hidden" data-id="retry-front">Jeszcze raz</span>
+                  <div class="expr" data-id="front-expr"></div>
+                  <div class="sub" data-id="front-sub"></div>
+                </div>
+                <div class="face back">
+                  <span class="badge" data-id="badge-back"></span>
+                  <div class="expr" data-id="back-expr"></div>
+                  <div class="feedback" data-id="feedback"></div>
+                </div>
+              </div>
+            </div>
+            <div class="actions" data-id="actions"></div>
+            <p class="kbd-hint" data-id="kbd-hint"></p>
+          </div>
+          <div class="numpad" data-id="numpad" aria-label="Klawiatura liczbowa"></div>
+        </div>
+
+        <div data-id="summary" class="panel summary hidden"></div>
+      </div>
+    </div>
+
+    <section class="panel mastery" aria-label="Postęp">
+      <div class="mastery-head">
+        <h2>${cfg.gridTitle}</h2>
+        ${segHtml('grid-seg', 'grid', cfg.gridOps)}
+      </div>
+      <div class="grid-scroll"><table class="grid" data-id="grid"></table></div>
+      <div class="mastery-foot">
+        <div class="legend">
+          <span><i></i>Jeszcze nie ćwiczone</span>
+          <span><i style="background:var(--m1)"></i>Do poprawy</span>
+          <span><i style="background:var(--m2)"></i>Uczę się</span>
+          <span><i style="background:var(--m3)"></i>Prawie umiem</span>
+          <span><i style="background:var(--m4)"></i>Umiem!</span>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+          <span class="overall" data-id="overall"></span>
+          <button class="link" type="button" data-id="reset">Wyzeruj postęp</button>
+        </div>
+      </div>
+    </section>`;
+
+  const $ = id => root.querySelector(`[data-id="${id}"]`);
+  const confetti = n => window.matmaConfetti && window.matmaConfetti(n);
 
   // ---------- storage ----------
   function load() {
     let s = null;
-    try { s = JSON.parse(localStorage.getItem(LS)); } catch (e) {}
-    return {
-      settings: { ...DEFAULTS, ...(s && s.settings) },
-      facts: (s && s.facts) || {},
-    };
+    try { s = JSON.parse(localStorage.getItem(cfg.ls)); } catch (e) {}
+    return { settings: { ...cfg.defaults, ...(s && s.settings) }, facts: (s && s.facts) || {} };
   }
   const store = load();
-  const save = () => { try { localStorage.setItem(LS, JSON.stringify(store)); } catch (e) {} };
+  const save = () => { try { localStorage.setItem(cfg.ls, JSON.stringify(store)); } catch (e) {} };
   const S = store.settings;
 
-  // ---------- facts ----------
-  // fact: {op:'mul'|'div', n, k}. mul: n × k = n·k. div: (n·k) : n = k
-  const key = f => (f.op === 'mul' ? 'm:' : 'd:') + f.n + ':' + f.k;
-  const answerOf = f => f.op === 'mul' ? f.n * f.k : f.k;
-  const leftOf = f => f.op === 'mul' ? (f.swap ? `${f.k} × ${f.n}` : `${f.n} × ${f.k}`) : `${f.n * f.k} : ${f.n}`;
-  const opName = f => f.op === 'mul' ? 'Mnożenie' : 'Dzielenie';
-
-  function eligible() {
-    const ops = S.op === 'mix' ? ['mul', 'div'] : [S.op];
-    const out = [];
-    for (const op of ops) for (const n of S.nums) {
-      if (op === 'div' && n === 0) continue;
-      for (let k = 0; k <= 10; k++) out.push({ op, n, k });
-    }
-    return out;
-  }
+  const { key, left: leftOf, answer: answerOf, opName } = cfg;
+  const eligible = () => cfg.eligible(S);
   // level: 0 = never seen, 1..4 = box (1 = needs work, 4 = mastered)
   const level = f => { const r = store.facts[key(f)]; return r ? r.box + 1 : 0; };
   const weight = f => [3, 6, 4, 2, 1][level(f)];
+  const swapped = f => ({ ...f, swap: cfg.canSwap(f) && Math.random() < 0.5 });
 
   function sample(list, size) {
     const pool = list.map(f => ({ f, w: weight(f) }));
@@ -476,7 +517,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
       for (; i < pool.length - 1; i++) { r -= pool[i].w; if (r <= 0) break; }
       out.push(pool.splice(i, 1)[0].f);
     }
-    return out.map(f => ({ ...f, swap: f.op === 'mul' && Math.random() < 0.5 }));
+    return out.map(swapped);
   }
 
   function record(f, ok) {
@@ -489,7 +530,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   }
 
   // ---------- round ----------
-  let R = null;      // round state
+  let R = null;
   let phase = 'question'; // question | ok | bad | revealed | summary
   let typed = '';
   let nextTimer = null;
@@ -503,18 +544,16 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     showCard();
   }
 
-  function current() { return R && R.queue[0]; }
+  const current = () => R && R.queue[0];
 
   function showCard() {
     const f = current();
     phase = 'question'; typed = '';
-    const card = $('card');
-    card.classList.remove('flipped', 'ok', 'bad');
+    $('card').classList.remove('flipped', 'ok', 'bad');
     if (!f) { renderEmpty(); return; }
     $('badge-front').textContent = $('badge-back').textContent = opName(f);
     $('retry-front').classList.toggle('hidden', !f.retry);
     $('feedback').textContent = '';
-    // back content is set after the flip animation starts, so it never spoils the answer
     renderFront();
     renderControls();
     renderStats();
@@ -531,12 +570,11 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 
   function renderFront() {
     const f = current();
-    const expr = $('front-expr');
     if (S.mode === 'type') {
-      expr.innerHTML = `<span>${leftOf(f)} =</span><span class="slot ${typed ? 'filled' : ''}">${typed || ''}<span class="caret"></span></span>`;
+      $('front-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="slot ${typed ? 'filled' : ''}">${typed || ''}<span class="caret"></span></span>`;
       $('front-sub').textContent = '';
     } else {
-      expr.innerHTML = `<span>${leftOf(f)} =</span><span class="slot">?</span>`;
+      $('front-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="slot">?</span>`;
       $('front-sub').textContent = 'Policz w głowie i odwróć kartę';
     }
   }
@@ -546,13 +584,13 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     $('back-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="answer">${answerOf(f)}</span>`;
     const fb = $('feedback');
     if (phase === 'ok') fb.textContent = PRAISE[Math.floor(Math.random() * PRAISE.length)] + (R.streak >= 3 ? ` Seria: ${R.streak}!` : '');
-    else if (phase === 'bad') fb.textContent = given !== undefined ? `Prawie! Wpisałeś/aś ${given}.` : 'Nic nie szkodzi — następnym razem się uda!';
+    else if (phase === 'bad') fb.textContent = given !== undefined ? `Prawie! Wpisałeś/aś ${given}.` : 'Nic nie szkodzi, następnym razem się uda!';
     else fb.textContent = '';
   }
 
   function btn(label, cls, fn) {
     const b = document.createElement('button');
-    b.className = 'btn ' + cls; b.textContent = label; b.onclick = fn; return b;
+    b.type = 'button'; b.className = 'btn ' + cls; b.textContent = label; b.onclick = fn; return b;
   }
 
   function renderControls() {
@@ -588,10 +626,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     $('bar').style.width = total ? (100 * R.done / total) + '%' : '0%';
   }
 
-  function flip() {
-    const card = $('card');
-    card.classList.add('flipped');
-  }
+  const flip = () => $('card').classList.add('flipped');
 
   function check() {
     if (phase !== 'question' || S.mode !== 'type' || !typed) return;
@@ -624,7 +659,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     score(f, ok);
     phase = ok ? 'ok' : 'bad';
     $('card').classList.add(ok ? 'ok' : 'bad');
-    $('feedback').textContent = ok ? PRAISE[Math.floor(Math.random() * PRAISE.length)] : 'Wróci za chwilę — poćwiczymy!';
+    $('feedback').textContent = ok ? PRAISE[Math.floor(Math.random() * PRAISE.length)] : 'Wróci za chwilę, poćwiczymy!';
     $('actions').innerHTML = '';
     renderStats();
     nextTimer = setTimeout(next, ok ? 700 : 1000);
@@ -646,12 +681,10 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     R.done++;
     if (phase === 'bad') {
       // the card comes back a few cards later
-      const pos = Math.min(3, R.queue.length);
-      R.queue.splice(pos, 0, { ...f, retry: true, swap: f.op === 'mul' && Math.random() < 0.5 });
+      R.queue.splice(Math.min(3, R.queue.length), 0, { ...swapped(f), retry: true });
     }
     if (!R.queue.length) return showSummary();
     const card = $('card');
-    // un-flip without animation glitch: wait for flip-back before swapping text
     card.classList.remove('flipped');
     showCard();
     card.classList.add('pop'); setTimeout(() => card.classList.remove('pop'), 350);
@@ -664,12 +697,12 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     const first = R.ok + R.bad;
     const pct = first ? Math.round(100 * R.ok / first) : 0;
     const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0;
-    const title = pct === 100 ? 'Perfekcyjnie!' : pct >= 90 ? 'Brawo! Świetna robota!' : pct >= 70 ? 'Bardzo dobrze!' : pct >= 40 ? 'Nieźle, ćwiczymy dalej!' : 'Każdy błąd to nauka — spróbuj jeszcze raz!';
+    const title = pct === 100 ? 'Perfekcyjnie!' : pct >= 90 ? 'Brawo! Świetna robota!' : pct >= 70 ? 'Bardzo dobrze!' : pct >= 40 ? 'Nieźle, ćwiczymy dalej!' : 'Każdy błąd to nauka, spróbuj jeszcze raz!';
     const mistakes = [...R.mistakes.values()];
     const el = $('summary');
     el.innerHTML = `
       <h2>${title}</h2>
-      <div class="stars">${[0,1,2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('')}</div>
+      <div class="stars">${[0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('')}</div>
       <div class="big-score">${R.ok} z ${first} dobrze za pierwszym razem (${pct}%) · najdłuższa seria: ${R.best}</div>
       ${mistakes.length ? `<p class="sub" style="margin-bottom:10px">Te warto jeszcze poćwiczyć:</p>
         <div class="mistakes">${mistakes.map(f => `<span>${leftOf({ ...f, swap: false })} = ${answerOf(f)}</span>`).join('')}</div>` : ''}
@@ -691,21 +724,19 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     renderFront();
   }
 
-  function buildNumpad() {
-    const np = $('numpad');
-    ['1','2','3','4','5','6','7','8','9','del','0','ok'].forEach(k => {
-      const b = document.createElement('button');
-      b.className = 'key' + (k === 'ok' ? ' go' : k === 'del' ? ' del' : '');
-      b.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
-      b.setAttribute('aria-label', k === 'del' ? 'Usuń' : k === 'ok' ? 'Sprawdź' : k);
-      if (k === 'ok') b.id = 'go-key';
-      b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? next() : check();
-      np.append(b);
-    });
-  }
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'].forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'key' + (k === 'ok' ? ' go' : k === 'del' ? ' del' : '');
+    b.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
+    b.setAttribute('aria-label', k === 'del' ? 'Usuń' : k === 'ok' ? 'Sprawdź' : k);
+    if (k === 'ok') b.dataset.id = 'go-key';
+    b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? next() : check();
+    $('numpad').append(b);
+  });
 
   document.addEventListener('keydown', e => {
-    if ($('tab-fiszki').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (root.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
     if (phase === 'summary') { if (e.key === 'Enter') newRound(); return; }
     if (S.mode === 'type') {
       if (/^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
@@ -721,31 +752,8 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 
   // ---------- settings ----------
   function syncSeg(id, attr, value) {
-    document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(value))));
-  }
-
-  function renderSettings() {
-    syncSeg('op-seg', 'op', S.op);
-    syncSeg('mode-seg', 'mode', S.mode);
-    syncSeg('size-seg', 'size', S.size);
-    syncSeg('grid-seg', 'grid', S.grid);
-    const chips = $('chips'); chips.innerHTML = '';
-    for (const n of NUMS) {
-      const c = document.createElement('button');
-      c.className = 'chip'; c.textContent = n;
-      c.setAttribute('aria-pressed', String(S.nums.includes(n)));
-      c.disabled = S.op === 'div' && n === 0;
-      c.onclick = () => {
-        S.nums = S.nums.includes(n) ? S.nums.filter(x => x !== n) : [...S.nums, n].sort((a, b) => a - b);
-        changed();
-      };
-      chips.append(c);
-    }
-    $('nums-label').textContent = S.op === 'mul' ? 'Mnożę przez…' : S.op === 'div' ? 'Dzielę przez…' : 'Mnożę i dzielę przez…';
-    const count = eligible().length;
-    const hint = $('nums-hint');
-    hint.classList.toggle('err', count === 0);
-    hint.textContent = count === 0 ? 'Zaznacz co najmniej jedną liczbę.' : `Do wyboru jest ${count} ${plural(count, 'fiszka', 'fiszki', 'fiszek')}.`;
+    const seg = $(id);
+    if (seg) seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(value))));
   }
 
   function plural(n, one, few, many) {
@@ -754,92 +762,167 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     return d >= 2 && d <= 4 && (t < 12 || t > 14) ? few : many;
   }
 
-  function changed() { save(); renderSettings(); newRound(); }
+  function renderSettings() {
+    syncSeg('op-seg', 'op', S.op);
+    syncSeg('mode-seg', 'mode', S.mode);
+    syncSeg('size-seg', 'size', S.size);
+    syncSeg('grid-seg', 'grid', S.grid);
+    syncSeg('range-seg', 'max', S.max);
+    if (cfg.filter === 'chips') {
+      const chips = $('chips'); chips.innerHTML = '';
+      for (const n of cfg.nums) {
+        const c = document.createElement('button');
+        c.type = 'button'; c.className = 'chip'; c.textContent = n;
+        c.setAttribute('aria-pressed', String(S.nums.includes(n)));
+        c.disabled = cfg.chipDisabled(S, n);
+        c.onclick = () => {
+          S.nums = S.nums.includes(n) ? S.nums.filter(x => x !== n) : [...S.nums, n].sort((a, b) => a - b);
+          changed();
+        };
+        chips.append(c);
+      }
+    }
+    $('nums-label').textContent = cfg.numsLabel(S);
+    const count = eligible().length;
+    const hint = $('nums-hint');
+    hint.classList.toggle('err', count === 0);
+    hint.textContent = count === 0 ? 'Zaznacz co najmniej jedną liczbę.' : `Do wyboru jest ${count} ${plural(count, 'fiszka', 'fiszki', 'fiszek')}.`;
+  }
 
-  document.querySelectorAll('#op-seg button').forEach(b => b.onclick = () => { S.op = b.dataset.op; changed(); });
-  document.querySelectorAll('#mode-seg button').forEach(b => b.onclick = () => { S.mode = b.dataset.mode; changed(); });
-  document.querySelectorAll('#size-seg button').forEach(b => b.onclick = () => { S.size = b.dataset.size; changed(); });
-  document.querySelectorAll('#grid-seg button').forEach(b => b.onclick = () => { S.grid = b.dataset.grid; save(); syncSeg('grid-seg', 'grid', S.grid); renderGrid(); });
-  $('all-nums').onclick = () => { S.nums = NUMS.slice(); changed(); };
-  $('no-nums').onclick = () => { S.nums = []; changed(); };
+  function changed() { save(); renderSettings(); newRound(); }
+  const onSeg = (id, fn) => { const seg = $(id); if (seg) seg.querySelectorAll('button').forEach(b => b.onclick = () => fn(b.dataset)); };
+
+  onSeg('op-seg', d => { S.op = d.op; changed(); });
+  onSeg('mode-seg', d => { S.mode = d.mode; changed(); });
+  onSeg('size-seg', d => { S.size = d.size; changed(); });
+  onSeg('range-seg', d => { S.max = +d.max; changed(); });
+  onSeg('grid-seg', d => { S.grid = d.grid; save(); syncSeg('grid-seg', 'grid', S.grid); renderGrid(); });
+  if (cfg.filter === 'chips') {
+    $('all-nums').onclick = () => { S.nums = cfg.nums.slice(); changed(); };
+    $('no-nums').onclick = () => { S.nums = []; changed(); };
+  }
   $('new-round').onclick = () => newRound();
   $('reset').onclick = () => {
-    if (confirm('Na pewno wyzerować cały postęp?')) { store.facts = {}; save(); renderGrid(); }
+    if (confirm('Na pewno wyzerować cały postęp w tym module?')) { store.facts = {}; save(); renderGrid(); }
   };
 
   // ---------- progress grid ----------
   function renderGrid() {
-    const op = S.grid;
-    let html = `<tr><th class="corner">${op === 'mul' ? '×' : ':'}</th>`;
-    for (let c = 0; c <= 10; c++) html += `<th>${c}</th>`;
-    html += '</tr>';
+    const g = cfg.grid(S.grid);
+    let html = `<tr><th class="corner">${g.corner}</th>${g.cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
     let mastered = 0, total = 0;
-    for (let r = 0; r <= 10; r++) {
+    for (const r of g.rows) {
       html += `<tr><th>${r}</th>`;
-      for (let c = 0; c <= 10; c++) {
-        if (op === 'div' && r === 0) { html += '<td class="off"></td>'; continue; }
-        const f = { op, n: r, k: c };
-        const lv = level(f);
+      for (const c of g.cols) {
+        const cell = g.cell(r, c);
+        if (!cell) { html += '<td class="off"></td>'; continue; }
+        const lv = level(cell.f);
         total++; if (lv === 4) mastered++;
-        // mul: row × col; div: (row·col) : row = col  → cell shows the dividend
-        const title = op === 'mul' ? `${r} × ${c} = ${r * c}` : `${r * c} : ${r} = ${c}`;
-        html += `<td class="l${lv}" title="${title}">${op === 'mul' ? r * c : `${r * c}:${r}`}</td>`;
+        html += `<td class="l${lv}" title="${cell.title}">${cell.text}</td>`;
       }
       html += '</tr>';
     }
-    $('grid').innerHTML = html;
-    $('overall').textContent = `Opanowane: ${mastered} z ${total} (${Math.round(100 * mastered / total)}%)`;
+    const t = $('grid');
+    t.innerHTML = html;
+    t.classList.toggle('wide', g.cols.length > 11);
+    $('overall').textContent = `Opanowane: ${mastered} z ${total} (${total ? Math.round(100 * mastered / total) : 0}%)`;
   }
 
-  // ---------- tabs (ready for more modules) ----------
-  function showTab(name) {
-    if (!document.getElementById('tab-' + name)) name = 'fiszki';
-    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x.dataset.tab === name)));
-    document.querySelectorAll('.tabpanel').forEach(p => p.hidden = p.id !== 'tab-' + name);
-    try { localStorage.setItem('matma.tab', name); } catch (e) {}
-  }
-  document.querySelectorAll('.tab').forEach(t => t.onclick = () => showTab(t.dataset.tab));
-  try { showTab(localStorage.getItem('matma.tab') || 'fiszki'); } catch (e) {}
-
-  // ---------- confetti ----------
-  const cv = $('confetti'), cx = cv.getContext('2d');
-  let parts = [], raf = 0;
-  function confetti(n) {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
-    const colors = ['#1f3a93', '#d9463b', '#fff176', '#1e8a4c', '#ffb74d', '#4fc3f7'];
-    for (let i = 0; i < n; i++) parts.push({
-      x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35,
-      vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4,
-      s: 6 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
-      c: colors[i % colors.length], life: 0,
-    });
-    if (!raf) raf = requestAnimationFrame(tick);
-  }
-  window.matmaConfetti = confetti;
-  function tick() {
-    const d = devicePixelRatio;
-    cx.clearRect(0, 0, cv.width, cv.height);
-    parts = parts.filter(p => p.y < innerHeight + 40 && p.life < 300);
-    for (const p of parts) {
-      p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life++;
-      cx.save(); cx.translate(p.x * d, p.y * d); cx.rotate(p.r);
-      cx.fillStyle = p.c; cx.fillRect(-p.s * d / 2, -p.s * d / 4, p.s * d, p.s * d / 2);
-      cx.restore();
-    }
-    raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0, 0, cv.width, cv.height), 0);
-  }
-
-  // ---------- install as app (PWA) ----------
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-  }
-
-  // ---------- start ----------
-  buildNumpad();
   renderSettings();
   renderGrid();
   newRound();
+}
+
+// ---------- the two flashcard modules ----------
+(() => {
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+
+  Flashcards({
+    id: 'fiszki', ls: 'matma.fiszki.v1',
+    defaults: { op: 'mix', nums: range(1, 10), mode: 'type', size: '20', grid: 'mul' },
+    ops: [['mul', 'Mnożenie'], ['div', 'Dzielenie'], ['mix', 'Wszystko']],
+    filter: 'chips', nums: range(0, 10),
+    numsLabel: S => S.op === 'mul' ? 'Mnożę przez…' : S.op === 'div' ? 'Dzielę przez…' : 'Mnożę i dzielę przez…',
+    chipDisabled: (S, n) => S.op === 'div' && n === 0,
+    // fact {op, n, k}: mul n × k = n·k, div (n·k) : n = k
+    eligible(S) {
+      const out = [];
+      for (const op of S.op === 'mix' ? ['mul', 'div'] : [S.op]) for (const n of S.nums) {
+        if (op === 'div' && n === 0) continue;
+        for (let k = 0; k <= 10; k++) out.push({ op, n, k });
+      }
+      return out;
+    },
+    key: f => (f.op === 'mul' ? 'm:' : 'd:') + f.n + ':' + f.k,
+    answer: f => f.op === 'mul' ? f.n * f.k : f.k,
+    left: f => f.op === 'mul' ? (f.swap ? `${f.k} × ${f.n}` : `${f.n} × ${f.k}`) : `${f.n * f.k} : ${f.n}`,
+    opName: f => f.op === 'mul' ? 'Mnożenie' : 'Dzielenie',
+    canSwap: f => f.op === 'mul',
+    gridTitle: 'Mój postęp – tabliczka',
+    gridOps: [['mul', 'Mnożenie'], ['div', 'Dzielenie']],
+    grid: op => ({
+      corner: op === 'mul' ? '×' : ':', rows: range(0, 10), cols: range(0, 10),
+      cell: (r, c) => op === 'div' && r === 0 ? null : op === 'mul'
+        ? { f: { op, n: r, k: c }, text: r * c, title: `${r} × ${c} = ${r * c}` }
+        : { f: { op, n: r, k: c }, text: `${r * c}:${r}`, title: `${r * c} : ${r} = ${c}` },
+    }),
+  });
+
+  const SYM = { add: '+', sub: '−', mul: '×' };
+  const NAME = { add: 'Dodawanie', sub: 'Odejmowanie', mul: 'Mnożenie' };
+  Flashcards({
+    id: 'do20', ls: 'matma.do20.v1',
+    defaults: { op: 'add', max: 20, mode: 'type', size: '20', grid: 'add' },
+    ops: [['add', 'Dodawanie'], ['sub', 'Odejmowanie'], ['mul', 'Mnożenie'], ['mix', 'Wszystko']],
+    filter: 'range', ranges: [['10', 'Do 10'], ['20', 'Do 20']],
+    numsLabel: () => 'Wyniki i liczby do…',
+    // fact {op, x, y}: x + y, x − y, x × y
+    eligible(S) {
+      const out = [], M = S.max;
+      for (const op of S.op === 'mix' ? ['add', 'sub', 'mul'] : [S.op]) {
+        if (op === 'add') for (let x = 0; x <= M; x++) for (let y = 0; x + y <= M; y++) out.push({ op, x, y });
+        if (op === 'sub') for (let x = 0; x <= M; x++) for (let y = 0; y <= x; y++) out.push({ op, x, y });
+        if (op === 'mul') for (let x = 0; x <= 10; x++) for (let y = 0; y <= 10; y++) if (x * y <= M) out.push({ op, x, y });
+      }
+      return out;
+    },
+    key: f => f.op[0] + ':' + f.x + ':' + f.y,
+    answer: f => f.op === 'add' ? f.x + f.y : f.op === 'sub' ? f.x - f.y : f.x * f.y,
+    left: f => f.swap ? `${f.y} ${SYM[f.op]} ${f.x}` : `${f.x} ${SYM[f.op]} ${f.y}`,
+    opName: f => NAME[f.op],
+    canSwap: f => f.op !== 'sub',
+    gridTitle: 'Mój postęp',
+    gridOps: [['add', 'Dodawanie'], ['sub', 'Odejmowanie'], ['mul', 'Mnożenie']],
+    grid: op => op === 'mul'
+      ? { corner: '×', rows: range(0, 10), cols: range(0, 10),
+          cell: (r, c) => r * c > 20 ? null : { f: { op, x: r, y: c }, text: r * c, title: `${r} × ${c} = ${r * c}` } }
+      : op === 'add'
+        ? { corner: '+', rows: range(0, 20), cols: range(0, 20),
+            cell: (r, c) => r + c > 20 ? null : { f: { op, x: r, y: c }, text: r + c, title: `${r} + ${c} = ${r + c}` } }
+        : { corner: '−', rows: range(0, 20), cols: range(0, 20),
+            cell: (r, c) => c > r ? null : { f: { op, x: r, y: c }, text: r - c, title: `${r} − ${c} = ${r - c}` } },
+  });
+})();
+
+// ---------- menu (burger) ----------
+(() => {
+  const btn = document.getElementById('menu-btn'), menu = document.getElementById('menu');
+  const items = [...menu.querySelectorAll('.menu-item')];
+  const open = show => { menu.hidden = !show; btn.setAttribute('aria-expanded', String(show)); };
+  function showTab(name) {
+    if (!document.getElementById('tab-' + name)) name = 'fiszki';
+    document.querySelectorAll('.tabpanel').forEach(p => p.hidden = p.id !== 'tab-' + name);
+    items.forEach(i => i.setAttribute('aria-current', String(i.dataset.tab === name)));
+    document.getElementById('menu-title').textContent = items.find(i => i.dataset.tab === name).querySelector('b').textContent;
+    try { localStorage.setItem('matma.tab', name); } catch (e) {}
+  }
+  btn.onclick = e => { e.stopPropagation(); open(menu.hidden); };
+  items.forEach(i => i.onclick = () => { showTab(i.dataset.tab); open(false); scrollTo(0, 0); });
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) open(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { open(false); btn.focus(); } }, true);
+  let start = 'fiszki';
+  try { start = localStorage.getItem('matma.tab') || 'fiszki'; } catch (e) {}
+  showTab(start);
 })();
 </script>
 <script>
