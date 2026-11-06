@@ -1,7 +1,7 @@
 {
   "name": "Matma",
   "short_name": "Matma",
-  "description": "Nauka matematyki dla dzieci: fiszki z mnożenia i dzielenia.",
+  "description": "Nauka matematyki dla dzieci: fiszki z mnożenia i dzielenia, działania w słupku.",
   "lang": "pl",
   "id": "./",
   "start_url": "./",

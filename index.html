@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.2">
+<meta name="version" content="1.3">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci. Fiszki z mnożenia i dzielenia w zakresie 100.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -186,13 +186,61 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 
+/* ---------- W słupku ---------- */
+:root{--p0:rgba(217,70,59,.10);--p1:rgba(30,138,76,.10);--p2:rgba(31,58,147,.10);--p3:rgba(255,159,67,.16);--p4:rgba(150,80,200,.12);--cw:54px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--p0:rgba(255,127,116,.14);--p1:rgba(110,230,154,.12);--p2:rgba(150,180,255,.14);--p3:rgba(255,180,90,.14);--p4:rgba(200,150,255,.14)}}
+.sl-top{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.sl-top .seg button{font-size:1.3rem}
+.stats.three{grid-template-columns:repeat(3,1fr)}
+.sl-play{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:32px;align-items:start;padding-top:6px}
+@media (max-width:1100px){.sl-play{grid-template-columns:1fr}}
+.sl-work{display:flex;flex-direction:column;align-items:center;gap:16px;min-width:0}
+.sheet-scroll{max-width:100%;overflow-x:auto}
+.sheet{display:grid;grid-template-columns:repeat(var(--n),var(--cw));font-size:2.5rem;line-height:1;user-select:none}
+.sheet .r{display:contents}
+.sheet .c{height:var(--cw);display:grid;place-items:center;position:relative}
+.sheet .lab .c{height:28px;font-size:1.05rem;color:var(--ink-soft)}
+.sheet .sm .c{height:28px;font-size:1.3rem;color:var(--red);align-items:end}
+.sheet .ln .c{height:10px}
+.sheet .ln .c.on::before{content:"";position:absolute;left:-1px;right:-1px;top:4px;border-top:3px solid var(--ink)}
+.sheet .c.p0{background:var(--p0)} .sheet .c.p1{background:var(--p1)} .sheet .c.p2{background:var(--p2)} .sheet .c.p3{background:var(--p3)} .sheet .c.p4{background:var(--p4)}
+.sheet .c.now{box-shadow:inset 0 0 0 2px var(--hl)}
+.sheet .sign{color:var(--ink)}
+.sheet .box{width:calc(var(--cw) - 8px);height:calc(var(--cw) - 6px);border:2px solid var(--ink-soft);border-radius:8px 11px 7px 10px;display:grid;place-items:center;background:var(--sheet)}
+.sheet .box.act{border-color:var(--ink);background:var(--hl)}
+.sheet .box.act::after{content:"";width:3px;height:.8em;background:var(--hl-ink);animation:blink 1s steps(1) infinite}
+.sheet .box.ok{border-color:var(--good);color:var(--good)}
+.sheet .box.bad{border-color:var(--red);background:var(--bad-soft);animation:wiggle .4s}
+@keyframes wiggle{25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.sheet .x{position:relative;color:var(--ink-soft)}
+.sheet .x::after{content:"";position:absolute;left:-6px;right:-6px;top:52%;border-top:3px solid var(--red);transform:rotate(-28deg)}
+.sheet .tap{cursor:pointer;border-radius:50%;outline:3px dashed var(--red);outline-offset:2px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{outline-color:transparent}}
+.sl-note{max-width:520px;width:100%;border:2px dashed var(--ink-soft);border-radius:12px 9px 14px 10px;padding:10px 14px;font-size:1.3rem;text-align:center;min-height:3.2em;display:flex;align-items:center;justify-content:center}
+.sl-note b{font-weight:400;color:var(--red);display:inline}
+.sl-note > span{display:block}
+.sl-note.good{border-color:var(--good);color:var(--good);border-style:solid}
+.sl-note.bad{border-color:var(--red)}
+.key.word{font-size:1.25rem}
+.key:disabled{opacity:.35;cursor:default}
+
 /* Phones: header, stats, card and keypad must fit one screen without scrolling */
 @media (max-width:640px){
-  header .wrap{min-height:0;gap:10px;flex-wrap:nowrap;padding-top:6px;padding-bottom:6px}
+  header .wrap{min-height:0;gap:2px 10px;flex-wrap:wrap;padding-top:6px;padding-bottom:4px}
   .brand{font-size:1.5rem;gap:6px;flex:none}
   .logo{width:32px;height:32px;font-size:1.3rem;border-width:2px}
   .ver{font-size:.75rem;padding:0 5px}
-  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0;width:100%;gap:12px}
+  .sl-top .seg{flex-wrap:nowrap;width:100%;justify-content:space-between;gap:2px}
+  .sl-top .seg button{font-size:clamp(.9rem,4.3vw,1.1rem);padding:1px 2px;white-space:nowrap}
+  .sl-play{gap:12px}
+  .sl-work{gap:10px}
+  :root{--cw:44px}
+  .sheet{font-size:2.1rem}
+  .sheet .lab .c,.sheet .sm .c{height:22px;font-size:1rem}
+  .sl-note{font-size:1.1rem;padding:6px 10px;min-height:2.6em}
+  .key.word{font-size:1.05rem}
+
   .tab{font-size:1.05rem;white-space:nowrap}
   main{padding-top:10px}
   .stage{gap:10px}
@@ -221,9 +269,10 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.2">1.2</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.3">1.3</span></div>
     <nav class="tabs" role="tablist" aria-label="Moduły">
       <button class="tab" role="tab" id="tab-btn-fiszki" aria-controls="tab-fiszki" aria-selected="true" data-tab="fiszki">Fiszki mnożenie i dzielenie</button>
+      <button class="tab" role="tab" id="tab-btn-slupek" aria-controls="tab-slupek" aria-selected="false" data-tab="slupek">W słupku</button>
     </nav>
   </div>
 </header>
@@ -331,9 +380,50 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
       </div>
     </section>
   </section>
+  <section id="tab-slupek" class="tabpanel" role="tabpanel" aria-labelledby="tab-btn-slupek" hidden>
+    <div class="layout">
+      <aside class="panel settings" aria-label="Ustawienia słupków">
+        <h2>Ustawienia</h2>
+        <div class="field">
+          <span class="label" id="sl-digits-label">Ile cyfr?</span>
+          <div class="seg" id="sl-digits">
+            <button data-d="2">2 cyfry</button>
+            <button data-d="3">3 cyfry</button>
+            <button data-d="4">4 cyfry</button>
+          </div>
+        </div>
+        <div class="field">
+          <button class="btn primary small" id="sl-new">Nowe działanie ↻</button>
+        </div>
+        <p class="hint">Kolory kolumn: J – jedności, D – dziesiątki, S – setki, T – tysiące.</p>
+      </aside>
+      <div class="stage">
+        <div class="sl-top">
+          <div class="seg" id="sl-op">
+            <button data-op="add">Dodawanie</button>
+            <button data-op="sub">Odejmowanie</button>
+            <button data-op="mul">Mnożenie</button>
+            <button data-op="div">Dzielenie</button>
+          </div>
+        </div>
+        <div class="stats three">
+          <div class="stat ok"><b id="sl-solved">0</b><span>Rozwiązane</span></div>
+          <div class="stat"><b id="sl-clean">0</b><span>Bez błędu</span></div>
+          <div class="stat streak"><b id="sl-streak">0</b><span>Seria</span></div>
+        </div>
+        <div class="sl-play">
+          <div class="sl-work">
+            <div class="sheet-scroll"><div class="sheet" id="sl-sheet" aria-live="polite"></div></div>
+            <div class="sl-note" id="sl-note"></div>
+          </div>
+          <div class="numpad" id="sl-pad" aria-label="Klawiatura liczbowa"></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer>Matma 1.2 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.3 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -615,7 +705,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   }
 
   document.addEventListener('keydown', e => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if ($('tab-fiszki').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
     if (phase === 'summary') { if (e.key === 'Enter') newRound(); return; }
     if (S.mode === 'type') {
       if (/^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
@@ -702,10 +792,14 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   }
 
   // ---------- tabs (ready for more modules) ----------
-  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
-    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x === t)));
-    document.querySelectorAll('.tabpanel').forEach(p => p.hidden = p.id !== 'tab-' + t.dataset.tab);
-  });
+  function showTab(name) {
+    if (!document.getElementById('tab-' + name)) name = 'fiszki';
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x.dataset.tab === name)));
+    document.querySelectorAll('.tabpanel').forEach(p => p.hidden = p.id !== 'tab-' + name);
+    try { localStorage.setItem('matma.tab', name); } catch (e) {}
+  }
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => showTab(t.dataset.tab));
+  try { showTab(localStorage.getItem('matma.tab') || 'fiszki'); } catch (e) {}
 
   // ---------- confetti ----------
   const cv = $('confetti'), cx = cv.getContext('2d');
@@ -722,6 +816,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
     });
     if (!raf) raf = requestAnimationFrame(tick);
   }
+  window.matmaConfetti = confetti;
   function tick() {
     const d = devicePixelRatio;
     cx.clearRect(0, 0, cv.width, cv.height);
@@ -745,6 +840,300 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   renderSettings();
   renderGrid();
   newRound();
+})();
+</script>
+<script>
+// ---------- W słupku: written addition, subtraction, multiplication and division ----------
+(() => {
+  const LS = 'matma.slupek.v1';
+  const PLACES = ['J', 'D', 'S', 'T', 'DT'];
+  const NAMES = ['jedności', 'dziesiątki', 'setki', 'tysiące', 'dziesiątki tysięcy'];
+  const SIGN = { add: '+', sub: '−', mul: '×', div: ':' };
+  const $ = id => document.getElementById(id);
+  const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  const rev = n => String(n).split('').reverse().map(Number); // index = place (0 = jedności)
+  const cap = t => t[0].toUpperCase() + t.slice(1);
+
+  let st = { op: 'add', digits: 3, solved: 0, clean: 0, streak: 0 };
+  try { st = { ...st, ...JSON.parse(localStorage.getItem(LS)) }; } catch (e) {}
+  const save = () => { try { localStorage.setItem(LS, JSON.stringify(st)); } catch (e) {} };
+
+  let P = null;       // current problem
+  let note = { html: '', cls: '' };
+  let badAt = null;   // cell flashing red
+
+  // ---------- problems ----------
+  function generate(op, n) {
+    const lo = 10 ** (n - 1), hi = 10 ** n - 1;
+    for (let tries = 0; ; tries++) {
+      let a, b, res;
+      if (op === 'add') { a = rnd(lo, hi); b = rnd(lo, hi); res = a + b; }
+      if (op === 'sub') { a = rnd(lo + 1, hi); b = rnd(Math.max(1, Math.floor(lo / 2)), a - 1); res = a - b; }
+      if (op === 'mul') { a = rnd(lo, hi); b = rnd(2, 9); res = a * b; }
+      if (op === 'div') { b = rnd(2, 9); const q = rnd(Math.ceil(lo / b), Math.floor(hi / b)); a = q * b; res = q; }
+      // prefer examples that actually need carrying / borrowing
+      const A = rev(a), B = rev(b);
+      const needs = op === 'add' ? A.some((d, i) => d + (B[i] || 0) >= 10)
+        : op === 'sub' ? A.some((d, i) => d < (B[i] || 0)) : true;
+      if (needs || tries > 6) return { op, a, b, res };
+    }
+  }
+
+  function setup(pr) {
+    pr.mistakes = 0; pr.wrongHere = 0; pr.done = false; pr.entered = [];
+    if (pr.op === 'div') return setupDiv(pr);
+    const A = rev(pr.a), B = rev(pr.b), R = rev(pr.res);
+    Object.assign(pr, { A, B, R, W: Math.max(A.length, B.length, R.length), cur: A.slice(), crossed: [], over: [], carry: [], active: 0 });
+    pr.carryIn = []; let c = 0;
+    for (let p = 0; p < pr.W; p++) {
+      pr.carryIn[p] = c;
+      const s = pr.op === 'add' ? (A[p] || 0) + (B[p] || 0) + c : (A[p] || 0) * pr.b + c;
+      c = Math.floor(s / 10);
+    }
+    return pr;
+  }
+
+  function setupDiv(pr) {
+    const D = String(pr.a).split('').map(Number), d = pr.b;
+    let start = 0, pre = D[0];
+    while (pre < d && start < D.length - 1) { start++; pre = pre * 10 + D[start]; }
+    const steps = []; let cur = pre;
+    for (let i = start; i < D.length; i++) {
+      if (i > start) cur = cur * 10 + D[i];
+      const q = Math.floor(cur / d), prod = q * d, rem = cur - prod;
+      steps.push({ i, cur, q, prod, rem });
+      cur = rem;
+    }
+    return Object.assign(pr, { D, d, steps, k: 0, shown: 0 });
+  }
+
+  const needBorrow = () => P.op === 'sub' && !P.done && P.cur[P.active] < (P.B[P.active] || 0);
+
+  function newProblem() {
+    P = setup(generate(st.op, st.digits));
+    badAt = null;
+    prompt();
+    render();
+  }
+
+  // ---------- messages ----------
+  function prompt() {
+    if (P.op === 'div') {
+      const s = P.steps[P.k];
+      note = { html: `Ile razy <b>${P.d}</b> mieści się w <b>${s.cur}</b>?`, cls: '' };
+      return;
+    }
+    const p = P.active, name = NAMES[p];
+    if (needBorrow()) {
+      note = { html: `${P.cur[p]} to mniej niż ${P.B[p]}, trzeba <b>pożyczyć</b>. Dotknij cyfry obok albo „Pożycz”.`, cls: '' };
+    } else if (p >= P.A.length && p >= (P.B.length) && P.op !== 'sub') {
+      note = { html: `Przeniesione <b>${P.carryIn[p]}</b> zapisz na dole.`, cls: '' };
+    } else {
+      note = { html: `Teraz <b>${name}</b>.`, cls: '' };
+    }
+  }
+
+  function explain() {
+    if (P.op === 'div') {
+      const s = P.steps[P.k];
+      return `${s.q} × ${P.d} = ${s.prod}` + ((s.q + 1) * P.d > s.cur ? `, a ${s.q + 1} × ${P.d} = ${(s.q + 1) * P.d} to już za dużo` : '') + `. Wpisz <b>${s.q}</b>.`;
+    }
+    const p = P.active, x = P.A[p] || 0, y = P.B[p] || 0, c = P.carryIn[p];
+    if (P.op === 'sub') return `${cap(NAMES[p])}: ${P.cur[p]} − ${y} = <b>${P.cur[p] - y}</b>.`;
+    if (p >= P.A.length && p >= P.B.length) return `Przeniesione ${c} zapisz na dole: wpisz <b>${c}</b>.`;
+    const s = P.op === 'add' ? x + y + c : x * P.b + c;
+    const expr = P.op === 'add' ? `${x} + ${y}${c ? ` + ${c}` : ''}` : `${x} × ${P.b}${c ? ` + ${c}` : ''}`;
+    return `${cap(NAMES[p])}: ${expr} = ${s}. Wpisz <b>${s % 10}</b>` + (s >= 10 ? `, a <b>${Math.floor(s / 10)}</b> przenieś dalej.` : '.');
+  }
+
+  function softHint() {
+    if (P.op === 'div') return `Spróbuj jeszcze raz. Ile razy <b>${P.d}</b> mieści się w <b>${P.steps[P.k].cur}</b>?`;
+    const p = P.active;
+    if (P.op === 'sub' && P.crossed[p]) return `Spróbuj jeszcze raz. Po pożyczeniu masz tu <b>${P.cur[p]}</b>.`;
+    if (P.op !== 'sub' && P.carryIn[p]) return `Spróbuj jeszcze raz. Pamiętaj o przeniesionej <b>${P.carryIn[p]}</b> (mała czerwona cyfra).`;
+    return 'Spróbuj jeszcze raz.';
+  }
+
+  // ---------- actions ----------
+  function enter(d) {
+    if (!P || P.done) return;
+    if (needBorrow()) { note.cls = 'bad'; renderNote(); return; }
+    const expected = P.op === 'div' ? P.steps[P.k].q : P.R[P.active];
+    if (d === expected) {
+      P.wrongHere = 0; badAt = null;
+      if (P.op === 'div') {
+        P.entered[P.steps[P.k].i] = d; P.k++; P.shown = P.k;
+        if (P.k >= P.steps.length) return finish();
+      } else {
+        const p = P.active;
+        P.entered[p] = d;
+        if (P.op !== 'sub' && p + 1 < P.W && P.carryIn[p + 1] > 0) P.carry[p + 1] = P.carryIn[p + 1];
+        P.active++;
+        if (P.active >= P.R.length) return finish();
+      }
+      prompt();
+    } else {
+      P.mistakes++; P.wrongHere++;
+      badAt = { d };
+      note = { html: P.wrongHere >= 2 ? explain() : softHint(), cls: 'bad' };
+    }
+    render();
+  }
+
+  function borrow() {
+    if (!needBorrow()) return;
+    const p = P.active;
+    let j = p + 1;
+    while (P.cur[j] === 0) j++;
+    P.cur[j]--; P.crossed[j] = true; P.over[j] = P.cur[j];
+    for (let k = j - 1; k > p; k--) { P.cur[k] = 9; P.crossed[k] = true; P.over[k] = 9; }
+    P.cur[p] += 10; P.crossed[p] = true; P.over[p] = P.cur[p];
+    note = { html: `Pożyczone! Teraz <b>${NAMES[p]}</b>: ${P.cur[p]} − ${P.B[p]}.`, cls: '' };
+    render();
+  }
+
+  function finish() {
+    P.done = true; badAt = null;
+    st.solved++;
+    if (P.mistakes === 0) { st.clean++; st.streak++; } else st.streak = 0;
+    save();
+    note = { html: `Brawo! ${P.a} ${SIGN[P.op]} ${P.b} = ${P.res}` + (P.mistakes === 0 ? '. Bez ani jednego błędu!' : '.'), cls: 'good' };
+    if (P.mistakes === 0 && window.matmaConfetti) window.matmaConfetti(st.streak % 5 === 0 ? 140 : 50);
+    render();
+  }
+
+  // ---------- rendering ----------
+  const cell = (html, cls = '') => `<span class="c ${cls}">${html}</span>`;
+  const box = (state, v = '') => `<span class="box ${state}">${v}</span>`;
+
+  function renderCol() {
+    const { W, A, B, R } = P, n = W + 1;
+    const col = p => W - p;                      // grid column of a place
+    const rows = [];
+    const row = (cls, fill) => {
+      const cells = Array.from({ length: n }, (_, c) => {
+        const p = W - c, tint = c > 0 ? `p${p}` + (c > 0 && p === P.active && !P.done ? ' now' : '') : '';
+        return fill(c, p, tint);
+      });
+      rows.push(`<div class="r ${cls}">${cells.join('')}</div>`);
+    };
+    row('lab', (c, p, t) => cell(c ? PLACES[p] : '', t));
+    row('sm', (c, p, t) => cell(c ? (P.op === 'sub' ? (P.crossed[p] ? P.over[p] : '') : (P.carry[p] || '')) : '', t));
+    const borrowing = needBorrow();
+    row('', (c, p, t) => {
+      if (!c || p >= A.length) return cell('', t);
+      const tap = borrowing && p === P.active + 1;
+      const v = P.op === 'sub' && P.crossed[p] ? `<span class="x">${A[p]}</span>` : A[p];
+      return `<span class="c ${t}${tap ? '" data-borrow="1' : ''}"><span class="${tap ? 'tap' : ''}">${v}</span></span>`;
+    });
+    row('', (c, p, t) => c === 0 ? cell(SIGN[P.op], 'sign') : cell(p < B.length ? B[p] : '', t));
+    row('ln', (c, p, t) => cell('', 'on ' + t));
+    row('', (c, p, t) => {
+      if (!c || p >= R.length) return cell('', t);
+      if (P.entered[p] !== undefined) return cell(box('ok', P.entered[p]), t);
+      if (p === P.active && !P.done) return cell(badAt ? box('bad', badAt.d) : box('act'), t);
+      return cell(box(''), t);
+    });
+    return { n, html: rows.join('') };
+  }
+
+  function renderDiv() {
+    const { D, d, steps } = P, L = D.length, n = L + 3;   // sign, digits, ':', divisor
+    const tint = c => c >= 1 && c <= L ? `p${L - c}` : '';
+    const rows = [];
+    const row = (cls, fill) => rows.push(`<div class="r ${cls}">${Array.from({ length: n }, (_, c) => fill(c, tint(c))).join('')}</div>`);
+    const active = !P.done && steps[P.k] ? steps[P.k].i : -1;
+    row('lab', (c, t) => cell(c >= 1 && c <= L ? PLACES[L - c] : '', t));
+    row('', (c, t) => {
+      const i = c - 1;
+      if (c < 1 || c > L || i < steps[0].i) return cell('', t);
+      if (P.entered[i] !== undefined) return cell(box('ok', P.entered[i]), t);
+      if (i === active) return cell(badAt ? box('bad', badAt.d) : box('act'), t + ' now');
+      return cell(box(''), t);
+    });
+    row('ln', (c, t) => cell('', (c >= 1 && c <= L ? 'on ' : '') + t));
+    row('', (c, t) => c >= 1 && c <= L ? cell(D[c - 1], t) : c === L + 1 ? cell(':', 'sign') : c === L + 2 ? cell(d, 'sign') : cell('', t));
+    // finished steps: − product, line, what is left (with the next digit brought down)
+    const placeNum = (num, endCol, sign) => {
+      const s = String(num), from = endCol - s.length + 1;
+      row('', (c, t) => c >= from && c <= endCol ? cell(s[c - from], t) : (sign && c === from - 1 ? cell('−', 'sign') : cell('', t)));
+      return from;
+    };
+    for (let k = 0; k < P.shown; k++) {
+      const s = steps[k], end = s.i + 1;
+      const from = placeNum(s.prod, end, true);
+      row('ln', (c, t) => cell('', (c >= from && c <= end ? 'on ' : '') + t));
+      if (s.i + 1 < L) placeNum(s.rem * 10 + D[s.i + 1], end + 1, false);
+      else placeNum(s.rem, end, false);
+    }
+    return { n, html: rows.join('') };
+  }
+
+  function renderNote() {
+    const el = $('sl-note');
+    el.innerHTML = `<span>${note.html}</span>`; el.className = 'sl-note ' + note.cls;
+  }
+
+  function render() {
+    const { n, html } = P.op === 'div' ? renderDiv() : renderCol();
+    const sh = $('sl-sheet');
+    sh.style.setProperty('--n', n);
+    sh.innerHTML = html;
+    renderNote();
+    $('sl-solved').textContent = st.solved;
+    $('sl-clean').textContent = st.clean;
+    $('sl-streak').textContent = st.streak;
+    const go = $('sl-go'), aux = $('sl-aux');
+    go.textContent = P.done ? 'Dalej →' : '✓';
+    go.classList.toggle('word', P.done);
+    go.disabled = !P.done;
+    const b = needBorrow();
+    aux.textContent = b ? 'Pożycz' : 'Pomocy';
+    aux.classList.toggle('go', b);
+    aux.disabled = P.done;
+  }
+
+  function renderSettings() {
+    document.querySelectorAll('#sl-op button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.op === st.op)));
+    document.querySelectorAll('#sl-digits button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.d === st.digits)));
+    $('sl-digits-label').textContent = st.op === 'mul' ? 'Ile cyfr ma mnożna?' : st.op === 'div' ? 'Ile cyfr ma dzielna?' : 'Ile cyfr?';
+  }
+
+  // ---------- input ----------
+  function help() {
+    if (!P || P.done) return;
+    if (needBorrow()) return borrow();
+    note = { html: explain(), cls: '' };
+    P.mistakes++;                // asking for the answer counts as a hint used
+    renderNote();
+  }
+
+  function buildPad() {
+    const pad = $('sl-pad');
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'aux', '0', 'go'].forEach(k => {
+      const b = document.createElement('button');
+      b.className = 'key' + (k === 'go' ? ' go' : k === 'aux' ? ' word' : '');
+      if (k === 'aux') { b.id = 'sl-aux'; b.onclick = help; }
+      else if (k === 'go') { b.id = 'sl-go'; b.onclick = () => P.done && newProblem(); }
+      else { b.textContent = k; b.onclick = () => enter(+k); }
+      pad.append(b);
+    });
+  }
+
+  $('sl-sheet').addEventListener('click', e => { if (e.target.closest('[data-borrow]')) borrow(); });
+  document.querySelectorAll('#sl-op button').forEach(b => b.onclick = () => { st.op = b.dataset.op; save(); renderSettings(); newProblem(); });
+  document.querySelectorAll('#sl-digits button').forEach(b => b.onclick = () => { st.digits = +b.dataset.d; save(); renderSettings(); newProblem(); });
+  $('sl-new').onclick = newProblem;
+
+  document.addEventListener('keydown', e => {
+    if ($('tab-slupek').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key)) { e.preventDefault(); enter(+e.key); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (P.done) newProblem(); else if (needBorrow()) borrow(); }
+  });
+
+  buildPad();
+  renderSettings();
+  newProblem();
 })();
 </script>
 </body>
