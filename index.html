@@ -4,9 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.1">
+<meta name="version" content="1.2">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci. Fiszki z mnożenia i dzielenia w zakresie 100.">
-<meta name="theme-color" content="#fbfcf7">
+<meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Matma">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231f3a93'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3E%C3%97%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -216,7 +221,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.1">1.1</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.2">1.2</span></div>
     <nav class="tabs" role="tablist" aria-label="Moduły">
       <button class="tab" role="tab" id="tab-btn-fiszki" aria-controls="tab-fiszki" aria-selected="true" data-tab="fiszki">Fiszki mnożenie i dzielenie</button>
     </nav>
@@ -328,7 +333,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   </section>
 </main>
 
-<footer>Matma 1.1 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.2 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -728,6 +733,11 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
       cx.restore();
     }
     raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0, 0, cv.width, cv.height), 0);
+  }
+
+  // ---------- install as app (PWA) ----------
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 
   // ---------- start ----------
