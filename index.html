@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
+<meta name="version" content="1.1">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci. Fiszki z mnożenia i dzielenia w zakresie 100.">
 <meta name="theme-color" content="#fbfcf7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231f3a93'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3E%C3%97%3C/text%3E%3C/svg%3E">
@@ -49,6 +50,7 @@ header.top{position:relative;z-index:10;background:var(--paper);border-bottom:2p
 header .wrap{display:flex;align-items:center;gap:22px;min-height:70px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
 .brand{display:flex;align-items:center;gap:10px;font-size:2.1rem;line-height:1}
 .logo{width:44px;height:44px;border:2.5px solid var(--ink);border-radius:52% 46% 55% 47%;display:grid;place-items:center;font-size:1.9rem;transform:rotate(-6deg)}
+.ver{font-size:.95rem;color:var(--red);border:1.5px solid var(--red);border-radius:52% 46% 55% 47%;padding:1px 7px;transform:rotate(-6deg);align-self:flex-start}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
 .tab{border:0;background:transparent;padding:2px 8px;font-size:1.3rem;color:var(--ink-soft)}
 .tab:hover{color:var(--ink)}
@@ -184,6 +186,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   header .wrap{min-height:0;gap:10px;flex-wrap:nowrap;padding-top:6px;padding-bottom:6px}
   .brand{font-size:1.5rem;gap:6px;flex:none}
   .logo{width:32px;height:32px;font-size:1.3rem;border-width:2px}
+  .ver{font-size:.75rem;padding:0 5px}
   .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-width:0}
   .tab{font-size:1.05rem;white-space:nowrap}
   main{padding-top:10px}
@@ -213,7 +216,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma</div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.1">1.1</span></div>
     <nav class="tabs" role="tablist" aria-label="Moduły">
       <button class="tab" role="tab" id="tab-btn-fiszki" aria-controls="tab-fiszki" aria-selected="true" data-tab="fiszki">Fiszki mnożenie i dzielenie</button>
     </nav>
@@ -325,7 +328,7 @@ footer{color:var(--ink-soft);text-align:center;font-size:1rem;padding:0 16px 32p
   </section>
 </main>
 
-<footer>Matma · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.1 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
