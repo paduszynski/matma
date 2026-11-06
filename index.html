@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.5">
+<meta name="version" content="1.6">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -206,6 +206,11 @@ header .wrap{position:relative}
 .menu-item:hover{background:var(--paper)}
 .menu-item[aria-current="true"] b{background:linear-gradient(transparent 50%,var(--hl) 50%);color:var(--hl-ink)}
 .grid.wide td{font-size:.95rem;padding:4px 0}
+.expr.long{font-size:clamp(2rem,6vw,3.8rem)}
+.feedback .explain{display:block;font-size:1.15rem;color:var(--ink-soft);margin-top:4px}
+.numpad.roman .key:not(.go){font-family:Georgia,"Times New Roman",serif;letter-spacing:.02em}
+.legend-line{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px;color:var(--ink-soft);font-size:1.05rem}
+.legend-line b{font-weight:400;color:var(--ink);font-family:Georgia,"Times New Roman",serif}
 .grid.wide th{font-size:1.05rem;padding:2px}
 
 /* ---------- W słupku ---------- */
@@ -282,6 +287,9 @@ header .wrap{position:relative}
   .numpad{gap:8px}
   .key{padding:0;height:clamp(46px,7.5svh,60px);font-size:1.7rem}
   .key.next{font-size:1.25rem}
+  .expr.long{font-size:clamp(1.5rem,8vw,2.4rem)}
+  .feedback .explain{font-size:1rem}
+  .legend-line{font-size:.95rem;gap:2px 10px}
   .actions:empty{display:none}
 }
 @media (hover:none){.kbd-hint{display:none}}
@@ -292,7 +300,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.5">1.5</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.6">1.6</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -301,6 +309,7 @@ header .wrap{position:relative}
       <button class="menu-item" type="button" data-tab="do20"><b>Liczę do 20</b><span>Dodawanie, odejmowanie i mnożenie z wynikiem do 20</span></button>
       <button class="menu-item" type="button" data-tab="fiszki"><b>Mnożenie i dzielenie</b><span>Fiszki z tabliczki mnożenia, wyniki do 100</span></button>
       <button class="menu-item" type="button" data-tab="slupek"><b>W słupku</b><span>Dodawanie, odejmowanie, mnożenie i dzielenie pisemne</span></button>
+      <button class="menu-item" type="button" data-tab="rzymskie"><b>Liczby rzymskie</b><span>Zamiana na rzymskie i z powrotem, do M (1000)</span></button>
     </nav>
   </div>
 </header>
@@ -308,6 +317,7 @@ header .wrap{position:relative}
 <main class="wrap">
   <section id="tab-do20" class="tabpanel" aria-label="Liczę do 20" hidden></section>
   <section id="tab-fiszki" class="tabpanel" aria-label="Mnożenie i dzielenie" hidden></section>
+  <section id="tab-rzymskie" class="tabpanel" aria-label="Liczby rzymskie" hidden></section>
   <section id="tab-slupek" class="tabpanel" aria-label="W słupku" hidden>
     <div class="layout">
       <aside class="panel settings" aria-label="Ustawienia słupków">
@@ -352,7 +362,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.5 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.6 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -402,7 +412,7 @@ function Flashcards(cfg) {
       <aside class="panel settings" aria-label="Ustawienia">
         <h2>Ustawienia</h2>
         <div class="field">
-          <span class="label">Działanie</span>
+          <span class="label">${cfg.opLabel || 'Działanie'}</span>
           ${segHtml('op-seg', 'op', cfg.ops)}
         </div>
         <div class="field">
@@ -455,6 +465,7 @@ function Flashcards(cfg) {
               </div>
             </div>
             <div class="actions" data-id="actions"></div>
+            ${cfg.legend ? `<div class="legend-line">${cfg.legend}</div>` : ''}
             <p class="kbd-hint" data-id="kbd-hint"></p>
           </div>
           <div class="numpad" data-id="numpad" aria-label="Klawiatura liczbowa"></div>
@@ -551,6 +562,7 @@ function Flashcards(cfg) {
     $('badge-front').textContent = $('badge-back').textContent = opName(f);
     $('retry-front').classList.toggle('hidden', !f.retry);
     $('feedback').textContent = '';
+    buildPad(padKind(f));
     renderFront();
     renderControls();
     renderStats();
@@ -565,8 +577,10 @@ function Flashcards(cfg) {
     renderStats();
   }
 
+  const isLong = f => String(leftOf(f)).length + String(answerOf(f)).length > 10;
   function renderFront() {
     const f = current();
+    $('front-expr').classList.toggle('long', isLong(f));
     if (S.mode === 'type') {
       $('front-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="slot ${typed ? 'filled' : ''}">${typed || ''}<span class="caret"></span></span>`;
       $('front-sub').textContent = '';
@@ -578,12 +592,15 @@ function Flashcards(cfg) {
 
   function renderBack(given) {
     const f = current();
+    $('back-expr').classList.toggle('long', isLong(f));
     $('back-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="answer">${answerOf(f)}</span>`;
     const fb = $('feedback');
     if (phase === 'ok') fb.textContent = PRAISE[Math.floor(Math.random() * PRAISE.length)] + (R.streak >= 3 ? ` Seria: ${R.streak}!` : '');
-    else if (phase === 'bad') fb.textContent = given !== undefined ? `Prawie! Wpisałeś/aś ${given}.` : 'Nic nie szkodzi, następnym razem się uda!';
+    else if (phase === 'bad') fb.innerHTML = (given !== undefined ? `Prawie! Wpisałeś/aś ${given}.` : 'Nic nie szkodzi, następnym razem się uda!') + explainHtml(f);
     else fb.textContent = '';
   }
+
+  const explainHtml = f => cfg.explain ? `<span class="explain">${cfg.explain(f)}</span>` : '';
 
   function btn(label, cls, fn) {
     const b = document.createElement('button');
@@ -628,8 +645,8 @@ function Flashcards(cfg) {
   function check() {
     if (phase !== 'question' || S.mode !== 'type' || !typed) return;
     const f = current();
-    const val = parseInt(typed, 10);
-    const ok = val === answerOf(f);
+    const val = typed;
+    const ok = val === String(answerOf(f));
     score(f, ok);
     phase = ok ? 'ok' : 'bad';
     const card = $('card');
@@ -656,7 +673,7 @@ function Flashcards(cfg) {
     score(f, ok);
     phase = ok ? 'ok' : 'bad';
     $('card').classList.add(ok ? 'ok' : 'bad');
-    $('feedback').textContent = ok ? PRAISE[Math.floor(Math.random() * PRAISE.length)] : 'Wróci za chwilę, poćwiczymy!';
+    $('feedback').innerHTML = ok ? PRAISE[Math.floor(Math.random() * PRAISE.length)] : 'Wróci za chwilę, poćwiczymy!' + explainHtml(f);
     $('actions').innerHTML = '';
     renderStats();
     nextTimer = setTimeout(next, ok ? 700 : 1000);
@@ -714,29 +731,45 @@ function Flashcards(cfg) {
   }
 
   // ---------- input ----------
+  const padKind = f => cfg.padKind ? cfg.padKind(f) : 'num';
+  const PADS = {
+    num: ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'],
+    roman: ['I', 'V', 'X', 'L', 'C', 'D', 'M', 'del', 'ok'],
+  };
+  let pad = null;
   function press(d) {
     if (phase !== 'question' || S.mode !== 'type') return;
+    const roman = pad === 'roman';
     if (d === 'del') typed = typed.slice(0, -1);
-    else if (typed.length < 3) typed = (typed === '0' ? '' : typed) + d;
+    else if (typed.length < (roman ? 12 : cfg.maxDigits || 3)) typed = (!roman && typed === '0' ? '' : typed) + d;
     renderFront();
   }
 
-  ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'].forEach(k => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'key' + (k === 'ok' ? ' go' : k === 'del' ? ' del' : '');
-    b.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
-    b.setAttribute('aria-label', k === 'del' ? 'Usuń' : k === 'ok' ? 'Sprawdź' : k);
-    if (k === 'ok') b.dataset.id = 'go-key';
-    b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? next() : check();
-    $('numpad').append(b);
-  });
+  function buildPad(kind) {
+    if (kind === pad) return;
+    pad = kind;
+    const np = $('numpad');
+    np.innerHTML = '';
+    np.classList.toggle('roman', kind === 'roman');
+    PADS[kind].forEach(k => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'key' + (k === 'ok' ? ' go' : k === 'del' ? ' del' : '');
+      b.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
+      b.setAttribute('aria-label', k === 'del' ? 'Usuń' : k === 'ok' ? 'Sprawdź' : k);
+      if (k === 'ok') b.dataset.id = 'go-key';
+      b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? next() : check();
+      np.append(b);
+    });
+  }
+  buildPad('num');
 
   document.addEventListener('keydown', e => {
     if (root.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
     if (phase === 'summary') { if (e.key === 'Enter') newRound(); return; }
     if (S.mode === 'type') {
-      if (/^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
+      if (pad === 'num' && /^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
+      else if (pad === 'roman' && /^[ivxlcdm]$/i.test(e.key)) { press(e.key.toUpperCase()); e.preventDefault(); }
       else if (e.key === 'Backspace') { press('del'); e.preventDefault(); }
       else if (e.key === 'Enter') { e.preventDefault(); if (phase === 'question') check(); else if (phase === 'bad') next(); }
     } else {
@@ -863,6 +896,49 @@ function Flashcards(cfg) {
         ? { f: { op, n: r, k: c }, text: r * c, title: `${r} × ${c} = ${r * c}` }
         : { f: { op, n: r, k: c }, text: `${r * c}:${r}`, title: `${r * c} : ${r} = ${c}` },
     }),
+  });
+
+
+  // ---------- Liczby rzymskie ----------
+  const RN = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+  const toRoman = n => { let out = ''; for (const [v, r] of RN) while (n >= v) { out += r; n -= v; } return out; };
+  // 447 -> [[400,'CD'],[40,'XL'],[7,'VII']]
+  const parts = n => [1000, 100, 10, 1].map(u => Math.floor(n / u) % (u === 1000 ? 10 : 10) * u).filter(Boolean).map(v => [v, toRoman(v)]);
+  const toArab = f => f.dir === 'r2a' && !f.swap;          // card shows the roman numeral
+  Flashcards({
+    id: 'rzymskie', ls: 'matma.rzymskie.v1',
+    defaults: { op: 'mix', max: 1000, mode: 'type', size: '20', grid: '100' },
+    opLabel: 'Kierunek',
+    ops: [['r2a', 'Rzymskie → zwykłe'], ['a2r', 'Zwykłe → rzymskie'], ['mix', 'Na zmianę']],
+    filter: 'range', ranges: [['20', 'Do 20'], ['100', 'Do 100'], ['1000', 'Do 1000 (M)']],
+    numsLabel: () => 'Liczby do…',
+    maxDigits: 4,
+    legend: RN.filter(([, r]) => r.length === 1).reverse().map(([v, r]) => `<span><b>${r}</b> = ${v}</span>`).join(''),
+    // fact {op:'rom', n, dir}; with "Na zmianę" the direction is picked per card through swap
+    eligible(S) {
+      const out = [];
+      for (let n = 1; n <= S.max; n++) out.push({ op: 'rom', n, dir: S.op === 'a2r' ? 'a2r' : 'r2a', mix: S.op === 'mix' });
+      return out;
+    },
+    key: f => 'r:' + f.n,
+    answer: f => toArab(f) ? f.n : toRoman(f.n),
+    left: f => toArab(f) ? toRoman(f.n) : f.n,
+    opName: f => toArab(f) ? 'Rzymskie → zwykłe' : 'Zwykłe → rzymskie',
+    canSwap: f => !!f.mix,
+    padKind: f => toArab(f) ? 'num' : 'roman',
+    explain: f => {
+      const p = parts(f.n);
+      return p.length > 1
+        ? `${toRoman(f.n)} = ${p.map(x => x[1]).join(' + ')} = ${p.map(x => x[0]).join(' + ')}`
+        : `${toRoman(f.n)} = ${f.n}`;
+    },
+    gridTitle: 'Mój postęp',
+    gridOps: [['100', '1–100'], ['1000', '100–1000, co 10']],
+    grid: g => g === '100'
+      ? { corner: '', rows: range(0, 9).map(r => r * 10), cols: range(1, 10),
+          cell: (r, c) => ({ f: { n: r + c }, text: r + c, title: `${r + c} = ${toRoman(r + c)}` }) }
+      : { corner: '', rows: range(1, 10).map(r => r * 100), cols: range(0, 9).map(c => c * 10),
+          cell: (r, c) => r + c > 1000 ? null : { f: { n: r + c }, text: r + c, title: `${r + c} = ${toRoman(r + c)}` } },
   });
 
   const SYM = { add: '+', sub: '−', mul: '×' };
