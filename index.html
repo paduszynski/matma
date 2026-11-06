@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.6">
+<meta name="version" content="1.7">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -100,8 +100,6 @@ main{padding:28px 0 48px}
 .stat.streak b{background:linear-gradient(transparent 55%,var(--hl) 55%);width:fit-content;padding:0 4px;color:var(--hl-ink)}
 @media (max-width:520px){.stats{gap:6px}.stat b{font-size:1.8rem}.stat span{font-size:.9rem}}
 
-.progress-bar{height:16px;border:2px solid var(--ink);border-radius:8px 6px 9px 7px;overflow:hidden;background:var(--sheet)}
-.progress-bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 7px);transition:width .4s ease}
 
 .play{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:32px;align-items:center;padding-top:10px}
 @media (max-width:1100px){.play{grid-template-columns:1fr}}
@@ -275,7 +273,6 @@ header .wrap{position:relative}
   .stat{padding:0}
   .stat b{font-size:1.6rem}
   .stat span{font-size:.85rem}
-  .progress-bar{height:12px}
   .play{gap:14px;padding-top:6px}
   .card{aspect-ratio:auto;height:clamp(150px,28svh,230px)}
   .face{padding:34px 14px 12px;gap:4px;background-image:linear-gradient(transparent 30px,var(--card-line) 30px,var(--card-line) 32px,transparent 32px),repeating-linear-gradient(transparent 0 31px,var(--rule) 31px 32px)}
@@ -300,7 +297,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.6">1.6</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.7">1.7</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -362,7 +359,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.6 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.7 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -445,7 +442,6 @@ function Flashcards(cfg) {
           <div class="stat streak"><b data-id="s-streak">0</b><span>Seria</span></div>
           <div class="stat"><b data-id="s-left">0</b><span>Zostało</span></div>
         </div>
-        <div class="progress-bar" aria-hidden="true"><i data-id="bar"></i></div>
 
         <div data-id="play" class="play">
           <div style="display:flex;flex-direction:column;gap:16px">
@@ -636,8 +632,6 @@ function Flashcards(cfg) {
     $('s-bad').textContent = R ? R.bad : 0;
     $('s-streak').textContent = R ? R.streak : 0;
     $('s-left').textContent = R ? R.queue.length : 0;
-    const total = R ? R.done + R.queue.length : 0;
-    $('bar').style.width = total ? (100 * R.done / total) + '%' : '0%';
   }
 
   const flip = () => $('card').classList.add('flipped');
@@ -707,7 +701,6 @@ function Flashcards(cfg) {
   function showSummary() {
     phase = 'summary';
     renderStats();
-    $('bar').style.width = '100%';
     const first = R.ok + R.bad;
     const pct = first ? Math.round(100 * R.ok / first) : 0;
     const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0;
