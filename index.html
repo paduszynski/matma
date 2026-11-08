@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.9">
+<meta name="version" content="1.10">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -297,7 +297,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.9">1.9</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.10">1.10</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -359,7 +359,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.9 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.10 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -584,10 +584,10 @@ function Flashcards(cfg) {
     $('front-expr').classList.toggle('long', isLong(f));
     if (S.mode === 'type') {
       $('front-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="slot ${typed ? 'filled' : ''}">${typed || ''}<span class="caret"></span></span>`;
-      $('front-sub').textContent = '';
+      $('front-sub').textContent = cfg.hint ? cfg.hint(f) : '';
     } else {
       $('front-expr').innerHTML = `<span>${leftOf(f)} =</span><span class="slot">?</span>`;
-      $('front-sub').textContent = 'Policz w głowie i odwróć kartę';
+      $('front-sub').textContent = (cfg.hint && cfg.hint(f)) || 'Policz w głowie i odwróć kartę';
     }
   }
 
@@ -601,7 +601,7 @@ function Flashcards(cfg) {
     else fb.textContent = '';
   }
 
-  const explainHtml = f => cfg.explain ? `<span class="explain">${cfg.explain(f)}</span>` : '';
+  const explainHtml = f => { const e = cfg.explain && cfg.explain(f); return e ? `<span class="explain">${e}</span>` : ''; };
 
   function btn(label, cls, fn) {
     const b = document.createElement('button');
@@ -948,6 +948,12 @@ function Flashcards(cfg) {
 
   const SYM = { add: '+', sub: '−', mul: '×' };
   const NAME = { add: 'Dodawanie', sub: 'Odejmowanie', mul: 'Mnożenie' };
+  // adding across ten, split the second number to fill up to 10: 8 + 9 -> 8 + 2 + 7
+  const viaTen = f => {
+    if (f.op !== 'add') return null;
+    const [a, b] = f.swap ? [f.y, f.x] : [f.x, f.y];
+    return a < 10 && b < 10 && a + b > 10 ? [a, 10 - a, a + b - 10] : null;
+  };
   Flashcards({
     id: 'do20', ls: 'matma.do20.v1',
     defaults: { op: 'add', max: 20, mode: 'type', size: '20', grid: 'add' },
@@ -969,6 +975,8 @@ function Flashcards(cfg) {
     left: f => f.swap ? `${f.y} ${SYM[f.op]} ${f.x}` : `${f.x} ${SYM[f.op]} ${f.y}`,
     opName: f => NAME[f.op],
     canSwap: f => f.op !== 'sub',
+    hint: f => { const t = viaTen(f); return t ? `Podpowiedź: ${t[0]} + ${t[1]} + ${t[2]}` : ''; },
+    explain: f => { const t = viaTen(f); return t ? `${t[0]} + ${t[1]} + ${t[2]} = 10 + ${t[2]} = ${10 + t[2]}` : ''; },
     gridTitle: 'Mój postęp',
     gridOps: [['add', 'Dodawanie'], ['sub', 'Odejmowanie'], ['mul', 'Mnożenie']],
     grid: op => op === 'mul'
