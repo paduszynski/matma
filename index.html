@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.7">
+<meta name="version" content="1.8">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -297,7 +297,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.7">1.7</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.8">1.8</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -359,7 +359,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.7 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.8 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -864,15 +864,15 @@ function Flashcards(cfg) {
     id: 'fiszki', ls: 'matma.fiszki.v1',
     defaults: { op: 'mix', nums: range(1, 10), mode: 'type', size: '20', grid: 'mul' },
     ops: [['mul', 'Mnożenie'], ['div', 'Dzielenie'], ['mix', 'Wszystko']],
-    filter: 'chips', nums: range(0, 10),
+    filter: 'chips', nums: range(1, 10),
     numsLabel: S => S.op === 'mul' ? 'Mnożę przez…' : S.op === 'div' ? 'Dzielę przez…' : 'Mnożę i dzielę przez…',
-    chipDisabled: (S, n) => S.op === 'div' && n === 0,
+    chipDisabled: () => false,
     // fact {op, n, k}: mul n × k = n·k, div (n·k) : n = k
     eligible(S) {
       const out = [];
       for (const op of S.op === 'mix' ? ['mul', 'div'] : [S.op]) for (const n of S.nums) {
-        if (op === 'div' && n === 0) continue;
-        for (let k = 0; k <= 10; k++) out.push({ op, n, k });
+        if (n === 0) continue; // no zero facts (old saved settings may still hold 0)
+        for (let k = 1; k <= 10; k++) out.push({ op, n, k });
       }
       return out;
     },
@@ -884,8 +884,8 @@ function Flashcards(cfg) {
     gridTitle: 'Mój postęp – tabliczka',
     gridOps: [['mul', 'Mnożenie'], ['div', 'Dzielenie']],
     grid: op => ({
-      corner: op === 'mul' ? '×' : ':', rows: range(0, 10), cols: range(0, 10),
-      cell: (r, c) => op === 'div' && r === 0 ? null : op === 'mul'
+      corner: op === 'mul' ? '×' : ':', rows: range(1, 10), cols: range(1, 10),
+      cell: (r, c) => op === 'mul'
         ? { f: { op, n: r, k: c }, text: r * c, title: `${r} × ${c} = ${r * c}` }
         : { f: { op, n: r, k: c }, text: `${r * c}:${r}`, title: `${r * c} : ${r} = ${c}` },
     }),
@@ -946,9 +946,9 @@ function Flashcards(cfg) {
     eligible(S) {
       const out = [], M = S.max;
       for (const op of S.op === 'mix' ? ['add', 'sub', 'mul'] : [S.op]) {
-        if (op === 'add') for (let x = 0; x <= M; x++) for (let y = 0; x + y <= M; y++) out.push({ op, x, y });
-        if (op === 'sub') for (let x = 0; x <= M; x++) for (let y = 0; y <= x; y++) out.push({ op, x, y });
-        if (op === 'mul') for (let x = 0; x <= 10; x++) for (let y = 0; y <= 10; y++) if (x * y <= M) out.push({ op, x, y });
+        if (op === 'add') for (let x = 1; x <= M; x++) for (let y = 1; x + y <= M; y++) out.push({ op, x, y });
+        if (op === 'sub') for (let x = 1; x <= M; x++) for (let y = 1; y <= x; y++) out.push({ op, x, y });
+        if (op === 'mul') for (let x = 1; x <= 10; x++) for (let y = 1; y <= 10; y++) if (x * y <= M) out.push({ op, x, y });
       }
       return out;
     },
@@ -960,12 +960,12 @@ function Flashcards(cfg) {
     gridTitle: 'Mój postęp',
     gridOps: [['add', 'Dodawanie'], ['sub', 'Odejmowanie'], ['mul', 'Mnożenie']],
     grid: op => op === 'mul'
-      ? { corner: '×', rows: range(0, 10), cols: range(0, 10),
+      ? { corner: '×', rows: range(1, 10), cols: range(1, 10),
           cell: (r, c) => r * c > 20 ? null : { f: { op, x: r, y: c }, text: r * c, title: `${r} × ${c} = ${r * c}` } }
       : op === 'add'
-        ? { corner: '+', rows: range(0, 20), cols: range(0, 20),
+        ? { corner: '+', rows: range(1, 19), cols: range(1, 19),
             cell: (r, c) => r + c > 20 ? null : { f: { op, x: r, y: c }, text: r + c, title: `${r} + ${c} = ${r + c}` } }
-        : { corner: '−', rows: range(0, 20), cols: range(0, 20),
+        : { corner: '−', rows: range(1, 20), cols: range(1, 20),
             cell: (r, c) => c > r ? null : { f: { op, x: r, y: c }, text: r - c, title: `${r} − ${c} = ${r - c}` } },
   });
 })();
