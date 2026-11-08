@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.8">
+<meta name="version" content="1.9">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -297,7 +297,7 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.8">1.8</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.9">1.9</span></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -359,7 +359,7 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.8 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.9 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -538,6 +538,11 @@ function Flashcards(cfg) {
   let phase = 'question'; // question | ok | bad | revealed | summary
   let typed = '';
   let nextTimer = null;
+  // after a wrong typed answer 'Dalej' stays locked for a moment, so the right answer gets read
+  const BAD_LOCK = 3000;
+  let lockUntil = 0, lockTimer = null;
+  const locked = () => Date.now() < lockUntil;
+  const tryNext = () => { if (phase === 'bad' && !locked()) next(); };
 
   function newRound(facts) {
     clearTimeout(nextTimer);
@@ -610,13 +615,15 @@ function Flashcards(cfg) {
     $('numpad').classList.toggle('hidden', !typeMode);
     $('numpad').classList.toggle('waiting', typeMode && phase !== 'question');
     const go = $('go-key');
-    go.textContent = phase === 'bad' ? 'Dalej →' : '✓';
+    const wait = phase === 'bad' ? Math.ceil((lockUntil - Date.now()) / 1000) : 0;
+    go.textContent = phase === 'bad' ? (wait > 0 ? `Dalej (${wait})` : 'Dalej →') : '✓';
+    go.disabled = wait > 0;
     go.classList.toggle('next', phase === 'bad');
     go.setAttribute('aria-label', phase === 'bad' ? 'Dalej' : 'Sprawdź');
     const hint = $('kbd-hint');
     if (typeMode) {
       if (phase === 'question') hint.innerHTML = 'Możesz pisać na klawiaturze, <kbd>Enter</kbd> sprawdza.';
-      if (phase === 'bad') hint.innerHTML = '<kbd>Enter</kbd> – dalej';
+      if (phase === 'bad') hint.innerHTML = wait > 0 ? 'Zobacz dobrą odpowiedź…' : '<kbd>Enter</kbd> – dalej';
       if (phase === 'ok') hint.innerHTML = '&nbsp;';
     } else {
       if (phase === 'question') { a.append(btn('Pokaż odpowiedź', 'primary', reveal)); hint.innerHTML = 'Kliknij kartę albo naciśnij <kbd>Spacja</kbd>'; }
@@ -646,7 +653,12 @@ function Flashcards(cfg) {
     const card = $('card');
     card.classList.add(ok ? 'ok' : 'bad');
     renderBack(ok ? undefined : val);
-    if (!ok) { card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 500); }
+    if (!ok) {
+      card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 500);
+      lockUntil = Date.now() + BAD_LOCK;
+      clearInterval(lockTimer);
+      lockTimer = setInterval(() => { if (phase !== 'bad' || !locked()) clearInterval(lockTimer); if (phase === 'bad') renderControls(); }, 250);
+    }
     flip();
     renderControls();
     renderStats();
@@ -684,7 +696,7 @@ function Flashcards(cfg) {
   }
 
   function next() {
-    clearTimeout(nextTimer);
+    clearTimeout(nextTimer); clearInterval(lockTimer); lockUntil = 0;
     const f = R.queue.shift();
     R.done++;
     if (phase === 'bad') {
@@ -751,7 +763,7 @@ function Flashcards(cfg) {
       b.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
       b.setAttribute('aria-label', k === 'del' ? 'Usuń' : k === 'ok' ? 'Sprawdź' : k);
       if (k === 'ok') b.dataset.id = 'go-key';
-      b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? next() : check();
+      b.onclick = () => k !== 'ok' ? press(k) : phase === 'bad' ? tryNext() : check();
       np.append(b);
     });
   }
@@ -764,7 +776,7 @@ function Flashcards(cfg) {
       if (pad === 'num' && /^[0-9]$/.test(e.key)) { press(e.key); e.preventDefault(); }
       else if (pad === 'roman' && /^[ivxlcdm]$/i.test(e.key)) { press(e.key.toUpperCase()); e.preventDefault(); }
       else if (e.key === 'Backspace') { press('del'); e.preventDefault(); }
-      else if (e.key === 'Enter') { e.preventDefault(); if (phase === 'question') check(); else if (phase === 'bad') next(); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (phase === 'question') check(); else if (phase === 'bad') tryNext(); }
     } else {
       if ((e.key === ' ' || e.key === 'Enter') && phase === 'question') { e.preventDefault(); reveal(); }
       else if (e.key === 'ArrowRight') judge(true);
