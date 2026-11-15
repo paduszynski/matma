@@ -1,5 +1,5 @@
 // Matma service worker: works offline, always tries the network first for the app itself.
-const CACHE = 'matma-1.17';
+const CACHE = 'matma-1.18';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './skarbonka.js', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
