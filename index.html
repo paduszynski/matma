@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.16">
+<meta name="version" content="1.17">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -321,7 +321,7 @@ a.menu-item{color:inherit;text-decoration:none}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.16">1.16</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.17">1.17</span></div>
     <div class="skb-slot" id="skb-slot"></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
@@ -385,13 +385,13 @@ a.menu-item{color:inherit;text-decoration:none}
   </section>
 </main>
 
-<footer>Matma 1.16 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.17 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script src="skarbonka.js"></script>
 <script>
 // ---------- star wallet (skarbonka.js, shared with Naukagry): one session per page ----------
-const SKB = window.Skarbonka ? Skarbonka.session('matma', { mult: 2 }) : null;
+const SKB = window.Skarbonka ? Skarbonka.session('matma') : null;
 // grows on every module switch: a set started before the switch is abandoned and gets no set bonus
 let skbEpoch = 0;
 let skbFlush = null; // W słupku: pending set bonus, paid before the module switch
