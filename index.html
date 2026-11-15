@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.11">
+<meta name="version" content="1.12">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -289,6 +289,28 @@ header .wrap{position:relative}
   .legend-line{font-size:.95rem;gap:2px 10px}
   .actions:empty{display:none}
 }
+/* ---------- star wallet pill (skarbonka.js) + games link ---------- */
+/* skarbonka.js injects its own CSS after this sheet, so overrides go through .skb-slot */
+.skb-slot{display:flex;align-items:center;min-width:0;margin-left:auto}
+.skb-slot + .menu-btn{margin-left:0}
+.skb-slot .skb{--skb-ink:var(--ink);--skb-bg:var(--sheet);--skb-lvl:#7a4fc4;--skb-star:#e3a008;font-size:1.2rem;border-radius:12px 16px 10px 14px;padding:5px 12px 5px 10px}
+.skb-slot .skb:hover{transform:rotate(-1deg)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .skb-slot .skb{--skb-lvl:#c4a6ff;--skb-star:#ffc93c;--skb-ln-fg:#1b1f33}}
+a.menu-item{color:inherit;text-decoration:none}
+.menu-item.games{border-top:2px dashed var(--rule);border-radius:0 0 9px 12px;margin-top:2px}
+@media (max-width:640px){
+  .skb-slot .skb{font-size:1rem;gap:5px;padding:3px 8px 3px 6px;border-width:1.5px}
+  .skb-slot .skb-lvl>span:first-child{display:none}
+  .skb-slot .skb-bar{width:24px;height:6px}
+  .menu-btn{min-width:44px}
+}
+@media (max-width:420px){
+  .ver{display:none}
+  .menu-title{display:none}
+  .brand{font-size:1.4rem}
+  header .wrap{column-gap:8px}
+}
+@media (max-width:380px){.skb-slot .skb-bar{width:16px}.skb-slot .skb{gap:4px}}
 @media (hover:none){.kbd-hint{display:none}}
 @media (max-width:359px){.menu-title{display:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
@@ -297,7 +319,8 @@ header .wrap{position:relative}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.11">1.11</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.12">1.12</span></div>
+    <div class="skb-slot" id="skb-slot"></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
       <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -307,6 +330,7 @@ header .wrap{position:relative}
       <button class="menu-item" type="button" data-tab="fiszki"><b>Mnożenie i dzielenie</b><span>Fiszki z tabliczki mnożenia, wyniki do 100</span></button>
       <button class="menu-item" type="button" data-tab="slupek"><b>W słupku</b><span>Dodawanie, odejmowanie, mnożenie i dzielenie pisemne</span></button>
       <button class="menu-item" type="button" data-tab="rzymskie"><b>Liczby rzymskie</b><span>Zamiana na rzymskie i z powrotem, do M (1000)</span></button>
+      <a class="menu-item games" href="/naukagry/"><b>Gry ★</b><span>Wydaj gwiazdki na gry</span></a>
     </nav>
   </div>
 </header>
@@ -359,10 +383,18 @@ header .wrap{position:relative}
   </section>
 </main>
 
-<footer>Matma 1.11 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.12 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
+<script src="skarbonka.js"></script>
 <script>
+// ---------- star wallet (skarbonka.js, shared with Naukagry): one session per page ----------
+const SKB = window.Skarbonka ? Skarbonka.session('matma') : null;
+// grows on every module switch: a set started before the switch is abandoned and gets no set bonus
+let skbEpoch = 0;
+let skbFlush = null; // W słupku: pending set bonus, paid before the module switch
+if (SKB) Skarbonka.mountBadge(document.getElementById('skb-slot'), { session: SKB });
+
 // ---------- shared: confetti, menu, PWA ----------
 (() => {
   const cv = document.getElementById('confetti'), cx = cv.getContext('2d');
@@ -425,6 +457,7 @@ function Flashcards(cfg) {
         <div class="field">
           <span class="label">Jak odpowiadam?</span>
           ${segHtml('mode-seg', 'mode', [['type', 'Wpisuję wynik'], ['flip', 'Odwracam kartę']])}
+          <p class="hint" data-id="mode-hint"></p>
         </div>
         <div class="field">
           <span class="label">Ile fiszek w rundzie?</span>
@@ -547,7 +580,8 @@ function Flashcards(cfg) {
   function newRound(facts) {
     clearTimeout(nextTimer);
     const list = facts || sample(eligible(), S.size);
-    R = { queue: list.map(f => ({ ...f, retry: false })), total: list.length, ok: 0, bad: 0, streak: 0, best: 0, done: 0, mistakes: new Map() };
+    R = { queue: list.map(f => ({ ...f, retry: false })), total: list.length, ok: 0, bad: 0, streak: 0, best: 0, done: 0, mistakes: new Map(), epoch: null, paid: false };
+    if (SKB) SKB.newSet();
     $('summary').classList.add('hidden');
     $('play').classList.remove('hidden');
     showCard();
@@ -686,6 +720,7 @@ function Flashcards(cfg) {
   }
 
   function score(f, ok) {
+    stars(f, ok);
     if (!f.retry) {
       record(f, ok);
       if (ok) R.ok++; else R.bad++;
@@ -693,6 +728,17 @@ function Flashcards(cfg) {
     if (ok) { R.streak++; R.best = Math.max(R.best, R.streak); }
     else { R.streak = 0; R.mistakes.set(key(f), f); }
     if (ok && R.streak > 0 && R.streak % 10 === 0) confetti(60);
+  }
+
+  // star wallet: only typed answers count (flip mode is self-assessed after seeing the answer).
+  // A "Jeszcze raz" card or a card in "Ćwicz błędy" was wrong before, so a right answer is a retry.
+  // Called once per attempt: check() and judge() only run in their own phase.
+  function stars(f, ok) {
+    if (!SKB || S.mode !== 'type') return;
+    if (R.epoch === null) R.epoch = skbEpoch;
+    if (!ok) SKB.wrong();
+    else if (f.retry || f.again) SKB.retry();
+    else SKB.correct();
   }
 
   function next() {
@@ -712,6 +758,8 @@ function Flashcards(cfg) {
 
   function showSummary() {
     phase = 'summary';
+    // set bonus once per finished round, unless the module was switched in the middle of it
+    if (SKB && !R.paid && R.epoch !== null && R.epoch === skbEpoch) { R.paid = true; SKB.setDone(); }
     renderStats();
     const first = R.ok + R.bad;
     const pct = first ? Math.round(100 * R.ok / first) : 0;
@@ -727,7 +775,7 @@ function Flashcards(cfg) {
         <div class="mistakes">${mistakes.map(f => `<span>${leftOf({ ...f, swap: false })} = ${answerOf(f)}</span>`).join('')}</div>` : ''}
       <div class="actions"></div>`;
     const a = el.querySelector('.actions');
-    if (mistakes.length) a.append(btn('Ćwicz błędy', 'bad', () => newRound(mistakes.map(f => ({ ...f, swap: false })))));
+    if (mistakes.length) a.append(btn('Ćwicz błędy', 'bad', () => newRound(mistakes.map(f => ({ ...f, swap: false, again: true })))));
     a.append(btn('Nowa runda ↻', 'primary', () => newRound()));
     $('play').classList.add('hidden');
     el.classList.remove('hidden');
@@ -800,6 +848,7 @@ function Flashcards(cfg) {
   function renderSettings() {
     syncSeg('op-seg', 'op', S.op);
     syncSeg('mode-seg', 'mode', S.mode);
+    $('mode-hint').textContent = S.mode === 'flip' && SKB ? 'Gwiazdki ★ są tylko za wpisany wynik.' : '';
     syncSeg('size-seg', 'size', S.size);
     syncSeg('grid-seg', 'grid', S.grid);
     syncSeg('range-seg', 'max', S.max);
@@ -996,10 +1045,17 @@ function Flashcards(cfg) {
 // ---------- menu (burger) ----------
 (() => {
   const btn = document.getElementById('menu-btn'), menu = document.getElementById('menu');
-  const items = [...menu.querySelectorAll('.menu-item')];
+  const items = [...menu.querySelectorAll('.menu-item[data-tab]')];
   const open = show => { menu.hidden = !show; btn.setAttribute('aria-expanded', String(show)); };
+  let shown = null;
   function showTab(name) {
     if (!document.getElementById('tab-' + name)) name = 'fiszki';
+    if (shown && shown !== name) {
+      if (skbFlush) skbFlush();
+      skbEpoch++;
+      if (SKB) SKB.newSet();
+    }
+    shown = name;
     document.querySelectorAll('.tabpanel').forEach(p => p.hidden = p.id !== 'tab-' + name);
     items.forEach(i => i.setAttribute('aria-current', String(i.dataset.tab === name)));
     document.getElementById('menu-title').textContent = items.find(i => i.dataset.tab === name).querySelector('b').textContent;
@@ -1033,6 +1089,27 @@ function Flashcards(cfg) {
   let P = null;       // current problem
   let note = { html: '', cls: '' };
   let badAt = null;   // cell flashing red
+
+  // ---------- star wallet ----------
+  // one problem = one item: right first try only if solved without a mistake or "Pomocy";
+  // every 10 solved problems make a set (nothing extra on screen, only the wallet's fly-up)
+  const SET_SIZE = 10;
+  let setCount = 0, setEpoch = skbEpoch, setTimer = null;
+  const touch = () => { if (P.epoch === undefined) P.epoch = skbEpoch; }; // set epoch = first input
+  function slip() { if (SKB && !P.skbWrong) { P.skbWrong = true; SKB.wrong(); } }
+  function payPending() { if (setTimer) { clearTimeout(setTimer); setTimer = null; SKB.setDone(); } }
+  skbFlush = payPending;
+  function starsSolved() {
+    if (!SKB) return;
+    if (P.skbWrong) SKB.retry(); else SKB.correct();
+    if (setEpoch !== skbEpoch) { setEpoch = skbEpoch; setCount = 0; }
+    if (P.epoch !== skbEpoch) return;   // worked on before a module switch: not part of this set
+    if (++setCount >= SET_SIZE) {
+      setCount = 0;
+      setTimer = setTimeout(payPending, 1000); // after the answer's own fly-up; paid at once on the next tap
+    }
+  }
+  function newStarSet() { payPending(); setCount = 0; setEpoch = skbEpoch; if (SKB) SKB.newSet(); }
 
   // ---------- problems ----------
   function generate(op, n) {
@@ -1082,6 +1159,7 @@ function Flashcards(cfg) {
   const needBorrow = () => P.op === 'sub' && !P.done && P.cur[P.active] < (P.B[P.active] || 0);
 
   function newProblem() {
+    payPending();
     P = setup(generate(st.op, st.digits));
     badAt = null;
     prompt();
@@ -1129,6 +1207,7 @@ function Flashcards(cfg) {
   // ---------- actions ----------
   function enter(d) {
     if (!P || P.done) return;
+    payPending(); touch();
     if (needBorrow()) { note.cls = 'bad'; renderNote(); return; }
     const expected = P.op === 'div' ? P.steps[P.k].q : P.R[P.active];
     if (d === expected) {
@@ -1146,6 +1225,7 @@ function Flashcards(cfg) {
       prompt();
     } else {
       P.mistakes++; P.wrongHere++;
+      slip();
       badAt = { d };
       note = { html: P.wrongHere >= 2 ? explain() : softHint(), cls: 'bad' };
     }
@@ -1154,6 +1234,7 @@ function Flashcards(cfg) {
 
   function borrow() {
     if (!needBorrow()) return;
+    touch();
     const p = P.active;
     let j = p + 1;
     while (P.cur[j] === 0) j++;
@@ -1169,6 +1250,7 @@ function Flashcards(cfg) {
     st.solved++;
     if (P.mistakes === 0) { st.clean++; st.streak++; } else st.streak = 0;
     save();
+    starsSolved();
     note = { html: `Brawo! ${P.a} ${SIGN[P.op]} ${P.b} = ${P.res}` + (P.mistakes === 0 ? '. Bez ani jednego błędu!' : '.'), cls: 'good' };
     if (P.mistakes === 0 && window.matmaConfetti) window.matmaConfetti(st.streak % 5 === 0 ? 140 : 50);
     render();
@@ -1275,8 +1357,10 @@ function Flashcards(cfg) {
   function help() {
     if (!P || P.done) return;
     if (needBorrow()) return borrow();
+    payPending(); touch();
     note = { html: explain(), cls: '' };
     P.mistakes++;                // asking for the answer counts as a hint used
+    slip();                      // and for the stars as a wrong answer
     renderNote();
   }
 
@@ -1293,9 +1377,11 @@ function Flashcards(cfg) {
   }
 
   $('sl-sheet').addEventListener('click', e => { if (e.target.closest('[data-borrow]')) borrow(); });
-  document.querySelectorAll('#sl-op button').forEach(b => b.onclick = () => { st.op = b.dataset.op; save(); renderSettings(); newProblem(); });
-  document.querySelectorAll('#sl-digits button').forEach(b => b.onclick = () => { st.digits = +b.dataset.d; save(); renderSettings(); newProblem(); });
-  $('sl-new').onclick = newProblem;
+  // settings changed: the set starts over without a bonus
+  document.querySelectorAll('#sl-op button').forEach(b => b.onclick = () => { st.op = b.dataset.op; save(); renderSettings(); newStarSet(); newProblem(); });
+  document.querySelectorAll('#sl-digits button').forEach(b => b.onclick = () => { st.digits = +b.dataset.d; save(); renderSettings(); newStarSet(); newProblem(); });
+  // a new problem before this one is solved skips it, which counts as wrong
+  $('sl-new').onclick = () => { if (P && !P.done) slip(); newProblem(); };
 
   document.addEventListener('keydown', e => {
     if ($('tab-slupek').hidden || e.ctrlKey || e.metaKey || e.altKey) return;
