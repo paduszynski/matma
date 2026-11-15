@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Matma – ćwiczymy matematykę</title>
-<meta name="version" content="1.18">
+<meta name="version" content="1.19">
 <meta name="description" content="Matma – aplikacja do nauki matematyki dla dzieci: liczenie do 20, tabliczka mnożenia, działania w słupku.">
 <meta name="theme-color" content="#fbfcf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#18203a" media="(prefers-color-scheme: dark)">
@@ -321,7 +321,7 @@ a.menu-item{color:inherit;text-decoration:none}
 <body>
 <header class="top">
   <div class="wrap">
-    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.18">1.18</span></div>
+    <div class="brand"><span class="logo">×</span>Matma<span class="ver" title="Wersja 1.19">1.19</span></div>
     <div class="skb-slot" id="skb-slot"></div>
     <button class="menu-btn" id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
       <span class="menu-title" id="menu-title"></span>
@@ -385,7 +385,7 @@ a.menu-item{color:inherit;text-decoration:none}
   </section>
 </main>
 
-<footer>Matma 1.18 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
+<footer>Matma 1.19 · ucz się w swoim tempie · postęp zapisuje się w tej przeglądarce</footer>
 <canvas id="confetti"></canvas>
 
 <script src="skarbonka.js"></script>
@@ -546,6 +546,9 @@ function Flashcards(cfg) {
   const level = f => { const r = store.facts[key(f)]; return r ? r.box + 1 : 0; };
   const weight = f => [3, 6, 4, 2, 1][level(f)];
   const swapped = f => ({ ...f, swap: cfg.canSwap(f) && Math.random() < 0.5 });
+  // swapIsTask: the swap flips the task itself (Roman "Na zmianę": 47 → XLVII vs XLVII → 47), so a missed card
+  // comes back the same way; otherwise the swap is just operand order and is re-rolled (retry) or dropped (Ćwicz błędy)
+  const comeBack = f => cfg.swapIsTask ? f : swapped(f);
 
   function sample(list, size) {
     const pool = list.map(f => ({ f, w: weight(f) }));
@@ -582,7 +585,8 @@ function Flashcards(cfg) {
   function newRound(facts) {
     clearTimeout(nextTimer);
     const list = facts || sample(eligible(), S.size);
-    R = { queue: list.map(f => ({ ...f, retry: false })), total: list.length, ok: 0, bad: 0, streak: 0, best: 0, done: 0, mistakes: new Map(), epoch: null, paid: false };
+    // review = "Ćwicz błędy": every card was missed before, so it pays retry points only and is never a finished set
+    R = { queue: list.map(f => ({ ...f, retry: false })), total: list.length, ok: 0, bad: 0, streak: 0, best: 0, done: 0, mistakes: new Map(), epoch: null, paid: false, review: !!facts };
     if (SKB) SKB.newSet();
     $('summary').classList.add('hidden');
     $('play').classList.remove('hidden');
@@ -752,7 +756,7 @@ function Flashcards(cfg) {
     R.done++;
     if (phase === 'bad') {
       // the card comes back a few cards later
-      R.queue.splice(Math.min(3, R.queue.length), 0, { ...swapped(f), retry: true });
+      R.queue.splice(Math.min(3, R.queue.length), 0, { ...comeBack(f), retry: true });
     }
     if (!R.queue.length) return showSummary();
     const card = $('card');
@@ -763,8 +767,9 @@ function Flashcards(cfg) {
 
   function showSummary() {
     phase = 'summary';
-    // set bonus once per finished round, unless the module was switched in the middle of it
-    if (SKB && !R.paid && R.epoch !== null && R.epoch === skbEpoch) { R.paid = true; SKB.setDone(); }
+    // set bonus once per finished round, unless the module was switched in the middle of it;
+    // a "Ćwicz błędy" round continues a set that already got its bonus: no bonus, not counted as a set
+    if (SKB && !R.paid && R.epoch !== null && R.epoch === skbEpoch) { R.paid = true; R.review ? SKB.newSet() : SKB.setDone(); }
     renderStats();
     const first = R.ok + R.bad;
     const pct = first ? Math.round(100 * R.ok / first) : 0;
@@ -777,10 +782,10 @@ function Flashcards(cfg) {
       <div class="stars">${[0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('')}</div>
       <div class="big-score">${R.ok} z ${first} dobrze za pierwszym razem (${pct}%) · najdłuższa seria: ${R.best}</div>
       ${mistakes.length ? `<p class="sub" style="margin-bottom:10px">Te warto jeszcze poćwiczyć:</p>
-        <div class="mistakes">${mistakes.map(f => `<span>${leftOf({ ...f, swap: false })} = ${answerOf(f)}</span>`).join('')}</div>` : ''}
+        <div class="mistakes">${mistakes.map(f => `<span>${leftOf({ ...f, swap: false })} = ${answerOf({ ...f, swap: false })}</span>`).join('')}</div>` : ''}
       <div class="actions"></div>`;
     const a = el.querySelector('.actions');
-    if (mistakes.length) a.append(btn('Ćwicz błędy', 'bad', () => newRound(mistakes.map(f => ({ ...f, swap: false, again: true })))));
+    if (mistakes.length) a.append(btn('Ćwicz błędy', 'bad', () => newRound(mistakes.map(f => ({ ...f, swap: cfg.swapIsTask ? f.swap : false, again: true })))));
     a.append(btn('Nowa runda ↻', 'primary', () => newRound()));
     $('play').classList.add('hidden');
     el.classList.remove('hidden');
@@ -984,6 +989,7 @@ function Flashcards(cfg) {
     left: f => toArab(f) ? toRoman(f.n) : f.n,
     opName: f => toArab(f) ? 'Rzymskie → zwykłe' : 'Zwykłe → rzymskie',
     canSwap: f => !!f.mix,
+    swapIsTask: true,
     padKind: f => toArab(f) ? 'num' : 'roman',
     explain: f => {
       const p = parts(f.n);
@@ -1097,7 +1103,9 @@ function Flashcards(cfg) {
 
   // ---------- star wallet ----------
   // one problem = one item: right first try only if solved without a mistake or "Pomocy";
-  // every 10 solved problems make a set (nothing extra on screen, only the wallet's fly-up)
+  // every 10 solved problems make a set (nothing extra on screen, only the wallet's fly-up);
+  // a problem where every digit was copied from a shown answer ("Pomocy" or the hint after two misses)
+  // pays nothing and is not part of the set; partial help is a retry as before
   const SET_SIZE = 10;
   let setCount = 0, setEpoch = skbEpoch, setTimer = null;
   const touch = () => { if (P.epoch === undefined) P.epoch = skbEpoch; }; // set epoch = first input
@@ -1106,6 +1114,7 @@ function Flashcards(cfg) {
   skbFlush = payPending;
   function starsSolved() {
     if (!SKB) return;
+    if (P.helped >= (P.op === 'div' ? P.steps.length : P.R.length)) return;
     if (P.skbWrong) SKB.retry(); else SKB.correct();
     if (setEpoch !== skbEpoch) { setEpoch = skbEpoch; setCount = 0; }
     if (P.epoch !== skbEpoch) return;   // worked on before a module switch: not part of this set
@@ -1134,7 +1143,8 @@ function Flashcards(cfg) {
   }
 
   function setup(pr) {
-    pr.mistakes = 0; pr.wrongHere = 0; pr.done = false; pr.entered = [];
+    // shownAns: the current digit's answer is on screen; helped: digits entered while their answer was shown
+    pr.mistakes = 0; pr.wrongHere = 0; pr.done = false; pr.entered = []; pr.shownAns = false; pr.helped = 0;
     if (pr.op === 'div') return setupDiv(pr);
     const A = rev(pr.a), B = rev(pr.b), R = rev(pr.res);
     Object.assign(pr, { A, B, R, W: Math.max(A.length, B.length, R.length), cur: A.slice(), crossed: [], over: [], carry: [], active: 0 });
@@ -1217,6 +1227,8 @@ function Flashcards(cfg) {
     const expected = P.op === 'div' ? P.steps[P.k].q : P.R[P.active];
     if (d === expected) {
       P.wrongHere = 0; badAt = null;
+      if (P.shownAns) P.helped++;
+      P.shownAns = false;
       if (P.op === 'div') {
         P.entered[P.steps[P.k].i] = d; P.k++; P.shown = P.k;
         if (P.k >= P.steps.length) return finish();
@@ -1232,6 +1244,7 @@ function Flashcards(cfg) {
       P.mistakes++; P.wrongHere++;
       slip();
       badAt = { d };
+      if (P.wrongHere >= 2) P.shownAns = true;
       note = { html: P.wrongHere >= 2 ? explain() : softHint(), cls: 'bad' };
     }
     render();
@@ -1364,6 +1377,7 @@ function Flashcards(cfg) {
     if (needBorrow()) return borrow();
     payPending(); touch();
     note = { html: explain(), cls: '' };
+    P.shownAns = true;
     P.mistakes++;                // asking for the answer counts as a hint used
     slip();                      // and for the stars as a wrong answer
     renderNote();
